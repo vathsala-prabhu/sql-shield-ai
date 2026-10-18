@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}SQL SHIELD AI{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+  <aside class="sidebar">
+    <h1>SQL SHIELD AI</h1>
+    <nav>
+      <a href="/detect" class="{{ 'active' if active == 'detect' else '' }}">Detect</a>
+            <a href="/incidents" class="{{ 'active' if active == 'incidents' else '' }}">Incidents</a>
+    </nav>
+    <p class="note">Academic prototype, not a production WAF.</p>
+  </aside>
+  <main class="content">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

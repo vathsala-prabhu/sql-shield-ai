@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Detect - SQL SHIELD AI{% endblock %}
+{% block content %}
+<h2>SQL Injection Detection</h2>
+<p class="muted">Paste a SQL query or sample input. It is analyzed by the model and never executed.</p>
+
+<textarea id="query" rows="6" placeholder="SELECT * FROM users WHERE id = 1 OR 1=1 --"></textarea>
+<button id="analyze">Analyze</button>
+
+<div id="result" class="result hidden"></div>
+
+<script>
+const btn = document.getElementById("analyze");
+const box = document.getElementById("result");
+
+function line(label, value) {
+  const p = document.createElement("p");
+  const b = document.createElement("strong");
+  b.textContent = label + ": ";
+  p.appendChild(b);
+  p.appendChild(document.createTextNode(value));
+  box.appendChild(p);
+}
+
+btn.addEventListener("click", async () => {
+  const query = document.getElementById("query").value;
+  box.className = "result";
+  box.textContent = "Analyzing...";
+  btn.disabled = true;
+  try {
+    const res = await fetch("/api/detect", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({query})
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      box.className = "result error";
+      box.textContent = data.error || "Request failed.";
+      return;
+    }
+    box.className = "result " + (data.action === "Blocked" ? "blocked" : "allowed");
+    box.textContent = "";
+    const h = document.createElement("h3");
+    h.textContent = data.action === "Blocked" ? "Potential SQL Injection (Blocked)" : "Legitimate (Allowed)";
+    box.appendChild(h);
+    line("Score", data.score);
+    line("Severity", data.severity);
+    line("Incident ID", data.incident_id);
+    if (data.patterns.length) line("Patterns to review", data.patterns.join(", "));
+    line("Explanation", data.explanation);
+    line("Mitigation", data.mitigation);
+  } catch (e) {
+    box.className = "result error";
+    box.textContent = "Could not reach the server.";
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+{% endblock %}

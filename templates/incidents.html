@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Incidents - SQL SHIELD AI{% endblock %}
+{% block content %}
+<h2>Security Incidents</h2>
+<p class="muted">Every analyzed input is recorded here. Predictions are not confirmed attacks.</p>
+
+{% if incidents %}
+<div class="table-wrap">
+<table>
+  <thead>
+    <tr>
+      <th>ID</th><th>Time (UTC)</th><th>Input</th>
+      <th>Prediction</th><th>Score</th><th>Action</th><th>Severity</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for i in incidents %}
+    <tr>
+      <td>{{ i.id }}</td>
+      <td>{{ i.timestamp }}</td>
+      <td class="mono">{{ i.submitted_input[:60] }}{% if i.submitted_input|length > 60 %}...{% endif %}</td>
+      <td>{{ i.predicted_class }}</td>
+      <td>{{ i.score }}</td>
+      <td><span class="tag {{ 'tag-block' if i.action_taken == 'Blocked' else 'tag-allow' }}">{{ i.action_taken }}</span></td>
+      <td>{{ i.severity }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>
+{% else %}
+<p class="result">No incidents yet. Analyze something on the Detect page.</p>
+{% endif %}
+{% endblock %}
