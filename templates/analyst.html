@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block title %}AI Security Analyst - SQL SHIELD AI{% endblock %}
+{% block breadcrumb %}AI Security Analyst Consultation{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <span>🤖</span> AI Security Analyst & Remediation Advisor
+  </h1>
+  <p class="page-subtitle">
+    Interactive cybersecurity advisor providing structured threat explanations, syntax deconstruction, and copy-pasteable prepared statement implementations.
+  </p>
+</div>
+
+<!-- Operational Mode Banner -->
+<div class="card" style="margin-bottom: 24px; padding: 14px 20px; background: rgba(6, 182, 212, 0.05); border-color: rgba(6, 182, 212, 0.2);">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div style="display:flex; align-items:center; gap:10px;">
+      <span style="font-size:18px;">💡</span>
+      <span style="font-size:13px; color:var(--text-secondary);">
+        {% if config.GEMINI_API_KEY %}
+        <strong>Active Provider:</strong> Google Gemini API ({{ config.GEMINI_MODEL }}) with automatic sensitive data redaction.
+        {% else %}
+        <strong>Active Provider:</strong> Intelligent Local Fallback Engine (Zero external network dependencies / API key not set).
+        {% endif %}
+      </span>
+    </div>
+    <span class="badge {{ 'badge-cyan' if config.GEMINI_API_KEY else 'badge-neutral' }}">
+      {{ 'Online AI Mode' if config.GEMINI_API_KEY else 'Local Rule Engine Mode' }}
+    </span>
+  </div>
+</div>
+
+<div class="grid-sidebar-layout">
+  <!-- Left Side: Prompt & Conversation Area -->
+  <div>
+    <div class="card" style="margin-bottom: 24px;">
+      <form id="analyst-form" {% if initial_incident %}data-incident-id="{{ initial_incident.id }}"{% endif %}>
+        {% if initial_incident %}
+        <!-- Incident Context Header -->
+        <div style="background:var(--bg-secondary); padding:14px; border-radius:6px; margin-bottom:16px; border:1px solid var(--border-color);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+            <span style="font-size:12px; font-weight:700; color:var(--accent-cyan);">SEEDED WITH INCIDENT #{{ initial_incident.id }}</span>
+            <span class="badge {{ 'badge-block' if initial_incident.action_taken == 'Blocked' else 'badge-allow' }}">
+              {{ initial_incident.action_taken }} ({{ (initial_incident.score * 100)|round|int }}%)
+            </span>
+          </div>
+          <div class="code-cell" style="max-width:100%; white-space:normal; font-size:12px; color:#38bdf8;">
+            {{ initial_incident.submitted_input }}
+          </div>
+        </div>
+        {% else %}
+        <div class="form-group">
+          <label class="form-label">SQL Statement or Web Input to Analyze:</label>
+          <textarea id="analyst-query" class="form-control" rows="4" placeholder="Enter SQL query to analyze, e.g. SELECT * FROM users WHERE id = 1 OR 1=1 --"></textarea>
+        </div>
+        {% endif %}
+
+        <div class="form-group">
+          <label class="form-label">Optional Specific Question for the Analyst:</label>
+          <input type="text" id="analyst-question" class="form-control" placeholder="e.g. How do I fix this in my Python Flask app? Could this be a false positive?">
+        </div>
+
+        <button type="submit" id="btn-analyst-submit" class="btn btn-primary" style="width:100%;">
+          Analyze with Security Analyst
+        </button>
+      </form>
+    </div>
+
+    <!-- Output Box Container -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>📋</span> Technical Briefing & Secure Implementation
+        </div>
+      </div>
+      <div id="analyst-output-box">
+        <div style="color:var(--text-muted); text-align:center; padding:40px 20px;">
+          <div style="font-size:32px; margin-bottom:10px;">🛡️</div>
+          Click "Analyze with Security Analyst" above to generate a comprehensive threat deconstruction and secure code remediation guide.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar: Guidance and Pre-canned Questions -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px;">
+        <span>❓</span> Sample Questions to Ask
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <button class="btn btn-secondary btn-sm" style="text-align:left; justify-content:flex-start;" onclick="document.getElementById('analyst-question').value = 'How do I fix this in Python using SQLite?';">
+          "How do I fix this in Python using SQLite?"
+        </button>
+        <button class="btn btn-secondary btn-sm" style="text-align:left; justify-content:flex-start;" onclick="document.getElementById('analyst-question').value = 'Could this classification be a false positive?';">
+          "Could this be a false positive?"
+        </button>
+        <button class="btn btn-secondary btn-sm" style="text-align:left; justify-content:flex-start;" onclick="document.getElementById('analyst-question').value = 'Show me Node.js mysql2 prepared statements for this.';">
+          "Show me Node.js mysql2 prepared statements."
+        </button>
+        <button class="btn btn-secondary btn-sm" style="text-align:left; justify-content:flex-start;" onclick="document.getElementById('analyst-question').value = 'Why was this blocked by the ML model?';">
+          "Why was this blocked by the ML model?"
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title" style="margin-bottom:10px;">
+        <span>🔒</span> Privacy & Safety Rules
+      </div>
+      <ul style="font-size:12px; color:var(--text-secondary); line-height:1.6; margin-left:18px;">
+        <li>Passwords, tokens, and emails are automatically redacted before external API calls.</li>
+        <li>The AI explains and educates; it <strong>never</strong> overrides the gateway's blocking decision.</li>
+        <li>ML is statistical: Always use prepared statements regardless of the ML score.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}

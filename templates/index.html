@@ -1,0 +1,254 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - SQL SHIELD AI{% endblock %}
+{% block breadcrumb %}Security Overview{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <span>🛡️</span> Security Operations Center (SOC) Dashboard
+  </h1>
+  <p class="page-subtitle">
+    Real-time telemetry, machine learning perimeter enforcement, and threat incident logs.
+  </p>
+</div>
+
+<!-- 4 Key Stat Metric Cards -->
+<div class="grid-4">
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">Total Requests Analyzed</span>
+      <div class="stat-icon blue">⚡</div>
+    </div>
+    <div class="stat-value">{{ stats.total_requests }}</div>
+    <div class="stat-sub">Live audit trail in SQLite</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">Legitimate Allowed</span>
+      <div class="stat-icon green">✓</div>
+    </div>
+    <div class="stat-value" style="color: var(--status-allow);">{{ stats.allowed_requests }}</div>
+    <div class="stat-sub">{{ stats.legitimate_requests }} classified benign</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">SQL Injections Blocked</span>
+      <div class="stat-icon red">🛑</div>
+    </div>
+    <div class="stat-value" style="color: var(--status-block);">{{ stats.blocked_requests }}</div>
+    <div class="stat-sub">{{ stats.sqli_detected }} attacks neutralized</div>
+  </div>
+
+  <div class="stat-card">
+    <div class="stat-header">
+      <span class="stat-label">Enforcement Threat Rate</span>
+      <div class="stat-icon cyan">📊</div>
+    </div>
+    <div class="stat-value">{{ stats.detection_rate_pct }}%</div>
+    <div class="stat-sub">Blocked / Total requests</div>
+  </div>
+</div>
+
+<!-- Charts Section -->
+<div class="grid-2">
+  <!-- Request Distribution Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span>📈</span> Gateway Traffic Classification
+      </div>
+      <span class="badge badge-neutral">Live Telemetry</span>
+    </div>
+    <div style="height: 240px; position: relative;">
+      <canvas id="trafficChart"></canvas>
+    </div>
+    <div style="display:flex; justify-content:center; gap:24px; margin-top:16px; font-size:12px;">
+      <div><span style="color:var(--status-allow); font-weight:700;">●</span> Allowed: {{ stats.allowed_requests }}</div>
+      <div><span style="color:var(--status-block); font-weight:700;">●</span> Blocked: {{ stats.blocked_requests }}</div>
+    </div>
+  </div>
+
+  <!-- Model Performance Comparison Card -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span>🤖</span> Classifier Benchmark (Test Set)
+      </div>
+      <a href="/model-comparison" class="btn btn-secondary btn-sm">Full Metrics →</a>
+    </div>
+    <div style="height: 240px; position: relative;">
+      <canvas id="modelBarChart"></canvas>
+    </div>
+    <div style="display:flex; justify-content:space-between; margin-top:16px; font-size:12px; color:var(--text-secondary);">
+      <span>Active: <strong>Random Forest (99.6% Acc)</strong></span>
+      <span>Baseline: <strong>XGBoost (99.5% Acc)</strong></span>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Incidents Table & Quick Test Banner -->
+<div class="card" style="margin-bottom: 24px;">
+  <div class="card-header">
+    <div class="card-title">
+      <span>📋</span> Recent Security Incidents & Activity
+    </div>
+    <div style="display:flex; gap:10px;">
+      <a href="/detect" class="btn btn-primary btn-sm">+ Inspect Query</a>
+      <a href="/incidents" class="btn btn-secondary btn-sm">View All Logs</a>
+    </div>
+  </div>
+
+  {% if recent_incidents %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Timestamp (UTC)</th>
+          <th>Submitted Query Snippet</th>
+          <th>ML Prediction</th>
+          <th>Score</th>
+          <th>Action</th>
+          <th>Severity</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for inc in recent_incidents %}
+        <tr>
+          <td style="font-weight: 600;">#{{ inc.id }}</td>
+          <td style="color: var(--text-muted); font-size: 12px;">{{ inc.timestamp }}</td>
+          <td class="code-cell" title="{{ inc.submitted_input }}">{{ inc.submitted_input }}</td>
+          <td>
+            <span class="badge {{ 'badge-block' if inc.predicted_class == 'SQLi' else 'badge-allow' }}">
+              {{ inc.predicted_class }}
+            </span>
+          </td>
+          <td style="font-family: var(--font-mono); font-weight: 600;">
+            {{ (inc.score * 100)|round|int }}%
+          </td>
+          <td>
+            <span class="badge {{ 'badge-block' if inc.action_taken == 'Blocked' else 'badge-allow' }}">
+              {{ inc.action_taken }}
+            </span>
+          </td>
+          <td>
+            <span class="badge {{ 'badge-block' if inc.severity == 'High' else ('badge-warn' if inc.severity == 'Medium' else 'badge-allow') }}">
+              {{ inc.severity }}
+            </span>
+          </td>
+          <td>
+            <div style="display:flex; gap:6px;">
+              <a href="/incidents/{{ inc.id }}" class="btn btn-secondary btn-sm" style="padding: 4px 8px;" title="View Forensics">View</a>
+              <a href="/analyst?incident_id={{ inc.id }}" class="btn btn-primary btn-sm" style="padding: 4px 8px;" title="Consult AI Analyst">AI</a>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div style="text-align:center; padding: 40px; color: var(--text-muted);">
+    No telemetry logs yet. <a href="/detect" style="color: var(--accent-cyan);">Inspect your first SQL input</a> to generate real incident records.
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // 1. Traffic Doughnut Chart
+  const trafficCtx = document.getElementById("trafficChart");
+  if (trafficCtx) {
+    new Chart(trafficCtx, {
+      type: "doughnut",
+      data: {
+        labels: ["Allowed (Legitimate)", "Blocked (SQLi)"],
+        datasets: [{
+          data: [{{ stats.allowed_requests }}, {{ stats.blocked_requests }}],
+          backgroundColor: ["#10b981", "#ef4444"],
+          borderColor: "#0d1527",
+          borderWidth: 3,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        cutout: "70%"
+      }
+    });
+  }
+
+  // 2. Model Comparison Bar Chart
+  const modelCtx = document.getElementById("modelBarChart");
+  if (modelCtx) {
+    {% if metrics and metrics.test %}
+    const rf = {{ metrics.test.random_forest | tojson }};
+    const xgb = {{ metrics.test.xgboost | tojson }};
+    {% else %}
+    const rf = { accuracy: 0.996, precision: 0.998, recall: 0.991, f1: 0.995 };
+    const xgb = { accuracy: 0.995, precision: 0.999, recall: 0.988, f1: 0.993 };
+    {% endif %}
+
+    new Chart(modelCtx, {
+      type: "bar",
+      data: {
+        labels: ["Accuracy", "Precision", "Recall", "F1 Score"],
+        datasets: [
+          {
+            label: "Random Forest (Selected)",
+            data: [
+              (rf.accuracy * 100).toFixed(2),
+              (rf.precision * 100).toFixed(2),
+              (rf.recall * 100).toFixed(2),
+              (rf.f1 * 100).toFixed(2)
+            ],
+            backgroundColor: "#06b6d4",
+            borderRadius: 4,
+          },
+          {
+            label: "XGBoost",
+            data: [
+              (xgb.accuracy * 100).toFixed(2),
+              (xgb.precision * 100).toFixed(2),
+              (xgb.recall * 100).toFixed(2),
+              (xgb.f1 * 100).toFixed(2)
+            ],
+            backgroundColor: "#3b82f6",
+            borderRadius: 4,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            min: 96,
+            max: 100,
+            ticks: { color: "#94a3b8", callback: (val) => val + "%" },
+            grid: { color: "#1e325c" }
+          },
+          x: {
+            ticks: { color: "#94a3b8" },
+            grid: { display: false }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: "#f1f5f9", font: { size: 11 } }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,287 @@
+{% extends "base.html" %}
+{% block title %}Model Comparison - SQL SHIELD AI{% endblock %}
+{% block breadcrumb %}Machine Learning Evaluation & Model Benchmark{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">
+    <span>📊</span> Machine Learning Model Comparison & Selection
+  </h1>
+  <p class="page-subtitle">
+    Empirical benchmark of <strong>Random Forest</strong> versus <strong>XGBoost</strong> trained on TF-IDF character n-grams (2–5) with 20,000 maximum features.
+  </p>
+</div>
+
+<!-- Selection Decision Banner -->
+<div class="card" style="margin-bottom: 24px; border-left: 5px solid var(--accent-cyan); background: linear-gradient(90deg, rgba(6, 182, 212, 0.08), var(--bg-card));">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+    <div>
+      <div style="font-size:12px; color:var(--accent-cyan); font-weight:700; text-transform:uppercase; letter-spacing:1px;">
+        PRODUCTION MODEL SELECTION DECISION
+      </div>
+      <div style="font-size:18px; font-weight:700; color:#fff; margin-top:2px;">
+        Selected: <span style="color:var(--accent-cyan);">Random Forest Classifier</span>
+      </div>
+    </div>
+    <span class="badge badge-cyan" style="font-size:13px; padding:6px 14px;">
+      Selection Rule: Highest SQLi Recall on Validation (0.9965)
+    </span>
+  </div>
+  <p style="font-size:13px; color:var(--text-secondary); margin-top:10px; line-height:1.6;">
+    In cybersecurity firewalls, <strong>Recall is the critical performance metric</strong>. A False Negative means a live SQL injection payload successfully slips past the gateway into the application database, causing data breaches. Random Forest achieved higher validation recall (99.65% vs 99.17%) and test recall (99.12% vs 98.76%), resulting in 28% fewer false negatives than XGBoost.
+  </p>
+</div>
+
+<!-- Test Set Performance Comparison Table -->
+<div class="card" style="margin-bottom: 24px;">
+  <div class="card-header">
+    <div class="card-title">
+      <span>🎯</span> Test Set Evaluation Metrics (Unseen Test Data: 4,623 Queries)
+    </div>
+    <span class="badge badge-neutral">Evaluated on test.csv</span>
+  </div>
+
+  {% if metrics and metrics.test %}
+  {% set rf = metrics.test.random_forest %}
+  {% set xgb = metrics.test.xgboost %}
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Random Forest (100 Trees) <span class="badge badge-cyan" style="font-size:10px;">Selected</span></th>
+          <th>XGBoost (Binary Logistic)</th>
+          <th>Cybersecurity Impact / Interpretation</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Accuracy</strong></td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#fff;">{{ (rf.accuracy * 100)|round(2) }}%</td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#fff;">{{ (xgb.accuracy * 100)|round(2) }}%</td>
+          <td style="font-size:12px; color:var(--text-secondary);">Overall proportion of correct classifications across both classes.</td>
+        </tr>
+        <tr>
+          <td><strong>Precision</strong></td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#fff;">{{ (rf.precision * 100)|round(2) }}%</td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#fff;">{{ (xgb.precision * 100)|round(2) }}%</td>
+          <td style="font-size:12px; color:var(--text-secondary);">Of queries flagged as SQLi, how many were genuine attacks. Minimizes False Positives.</td>
+        </tr>
+        <tr>
+          <td><strong>Recall (Sensitivity)</strong></td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan);">{{ (rf.recall * 100)|round(2) }}%</td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#94a3b8;">{{ (xgb.recall * 100)|round(2) }}%</td>
+          <td style="font-size:12px; color:var(--text-secondary);"><strong style="color:var(--accent-cyan);">Crucial Security KPI:</strong> Of all actual attacks, how many were blocked. Minimizes False Negatives.</td>
+        </tr>
+        <tr>
+          <td><strong>F1 Score</strong></td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#fff;">{{ (rf.f1 * 100)|round(2) }}%</td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#fff;">{{ (xgb.f1 * 100)|round(2) }}%</td>
+          <td style="font-size:12px; color:var(--text-secondary);">Harmonic mean of precision and recall.</td>
+        </tr>
+        <tr>
+          <td><strong>False Negatives (Attacks Missed)</strong></td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan);">{{ rf.false_negatives }}</td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:var(--status-block);">{{ xgb.false_negatives }}</td>
+          <td style="font-size:12px; color:var(--text-secondary);">Dangerous outcome: Malicious queries mistakenly allowed through to the database.</td>
+        </tr>
+        <tr>
+          <td><strong>False Positives (Benign Blocked)</strong></td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#fff;">{{ rf.false_positives }}</td>
+          <td style="font-family:var(--font-mono); font-weight:700; color:#fff;">{{ xgb.false_positives }}</td>
+          <td style="font-size:12px; color:var(--text-secondary);">Inconvenience outcome: Legitimate business queries mistakenly blocked.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p style="color:var(--text-muted); padding:20px;">Metrics data not loaded. Please ensure models/metrics.json is available.</p>
+  {% endif %}
+</div>
+
+<!-- Comparison Chart -->
+<div class="card" style="margin-bottom: 24px;">
+  <div class="card-header">
+    <div class="card-title">
+      <span>📈</span> Performance Metrics Comparison Chart
+    </div>
+  </div>
+  <div style="height: 320px; position: relative;">
+    <canvas id="detailedMetricsChart"></canvas>
+  </div>
+</div>
+
+<!-- Confusion Matrices Grid -->
+<div class="grid-2">
+  <!-- Random Forest Confusion Matrix -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span>🌲</span> Random Forest Confusion Matrix
+      </div>
+      <span class="badge badge-cyan">Selected</span>
+    </div>
+
+    {% if metrics and metrics.test %}
+    {% set rf = metrics.test.random_forest %}
+    <div class="matrix-container">
+      <div></div>
+      <div class="matrix-header">Pred: Legitimate</div>
+      <div class="matrix-header">Pred: SQLi</div>
+
+      <div class="matrix-label">Actual: Legitimate</div>
+      <div class="matrix-cell tn">
+        <div class="matrix-number" style="color:var(--status-allow);">{{ rf.true_negatives }}</div>
+        <div class="matrix-tag">True Negative (Safe Allowed)</div>
+      </div>
+      <div class="matrix-cell fp">
+        <div class="matrix-number" style="color:var(--status-warn);">{{ rf.false_positives }}</div>
+        <div class="matrix-tag">False Positive (False Alarm)</div>
+      </div>
+
+      <div class="matrix-label">Actual: SQLi</div>
+      <div class="matrix-cell fn">
+        <div class="matrix-number" style="color:var(--status-block);">{{ rf.false_negatives }}</div>
+        <div class="matrix-tag">False Negative (Missed Attack)</div>
+      </div>
+      <div class="matrix-cell tp">
+        <div class="matrix-number" style="color:var(--status-allow);">{{ rf.true_positives }}</div>
+        <div class="matrix-tag">True Positive (Attack Blocked)</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- XGBoost Confusion Matrix -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <span>⚡</span> XGBoost Confusion Matrix
+      </div>
+      <span class="badge badge-neutral">Comparison</span>
+    </div>
+
+    {% if metrics and metrics.test %}
+    {% set xgb = metrics.test.xgboost %}
+    <div class="matrix-container">
+      <div></div>
+      <div class="matrix-header">Pred: Legitimate</div>
+      <div class="matrix-header">Pred: SQLi</div>
+
+      <div class="matrix-label">Actual: Legitimate</div>
+      <div class="matrix-cell tn">
+        <div class="matrix-number" style="color:var(--status-allow);">{{ xgb.true_negatives }}</div>
+        <div class="matrix-tag">True Negative (Safe Allowed)</div>
+      </div>
+      <div class="matrix-cell fp">
+        <div class="matrix-number" style="color:var(--status-warn);">{{ xgb.false_positives }}</div>
+        <div class="matrix-tag">False Positive (False Alarm)</div>
+      </div>
+
+      <div class="matrix-label">Actual: SQLi</div>
+      <div class="matrix-cell fn">
+        <div class="matrix-number" style="color:var(--status-block);">{{ xgb.false_negatives }}</div>
+        <div class="matrix-tag">False Negative (Missed Attack)</div>
+      </div>
+      <div class="matrix-cell tp">
+        <div class="matrix-number" style="color:var(--status-allow);">{{ xgb.true_positives }}</div>
+        <div class="matrix-tag">True Positive (Attack Blocked)</div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Architecture & Pipeline Deep Dive -->
+<div class="card">
+  <div class="card-title" style="margin-bottom:14px;">
+    <span>🔍</span> Feature Engineering & Model Mechanics
+  </div>
+  <div style="font-size:13px; color:var(--text-secondary); line-height:1.7;">
+    <p>
+      <strong>Why Character N-Grams?</strong> Traditional word-level tokenizers (like space-separated bag of words) fail against SQL injection because attackers frequently omit spaces, use inline comments (<code>/*evasion*/</code>), or concatenate strings without whitespace (<code>'OR'1'='1'</code>). Character n-grams (sub-sequences of length 2 to 5 characters) capture fine-grained syntactic patterns regardless of whitespace obfuscation.
+    </p>
+    <p style="margin-top:10px;">
+      <strong>Why Random Forest over XGBoost for this dataset?</strong> While XGBoost achieved slightly fewer false positives (1 vs 3), Random Forest significantly reduced false negatives (15 vs 21). In production cybersecurity, preventing real breaches is paramount. Random Forest's ensemble of 100 decorrelated decision trees with feature sub-sampling provides exceptional resistance to overfitting on high-dimensional character n-gram matrices (20,000 features).
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const ctx = document.getElementById("detailedMetricsChart");
+  if (ctx) {
+    {% if metrics and metrics.test %}
+    const rf = {{ metrics.test.random_forest | tojson }};
+    const xgb = {{ metrics.test.xgboost | tojson }};
+    {% else %}
+    const rf = { accuracy: 0.9961, precision: 0.9982, recall: 0.9912, f1: 0.9947 };
+    const xgb = { accuracy: 0.9952, precision: 0.9994, recall: 0.9876, f1: 0.9935 };
+    {% endif %}
+
+    new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: ["Accuracy", "Precision", "Recall (Attacks Blocked)", "F1 Score"],
+        datasets: [
+          {
+            label: "Random Forest (Selected)",
+            data: [
+              (rf.accuracy * 100).toFixed(2),
+              (rf.precision * 100).toFixed(2),
+              (rf.recall * 100).toFixed(2),
+              (rf.f1 * 100).toFixed(2)
+            ],
+            backgroundColor: "#06b6d4",
+            borderColor: "#0891b2",
+            borderWidth: 1,
+            borderRadius: 6,
+          },
+          {
+            label: "XGBoost",
+            data: [
+              (xgb.accuracy * 100).toFixed(2),
+              (xgb.precision * 100).toFixed(2),
+              (xgb.recall * 100).toFixed(2),
+              (xgb.f1 * 100).toFixed(2)
+            ],
+            backgroundColor: "#3b82f6",
+            borderColor: "#2563eb",
+            borderWidth: 1,
+            borderRadius: 6,
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: {
+            min: 98,
+            max: 100,
+            ticks: { color: "#94a3b8", callback: (val) => val + "%" },
+            grid: { color: "#1e325c" }
+          },
+          x: {
+            ticks: { color: "#f1f5f9", font: { weight: 600 } },
+            grid: { display: false }
+          }
+        },
+        plugins: {
+          legend: {
+            labels: { color: "#f1f5f9", font: { size: 12 } }
+          },
+          tooltip: {
+            callbacks: {
+              label: (item) => `${item.dataset.label}: ${item.parsed.y}%`
+            }
+          }
+        }
+      }
+    });
+  }
+});
+</script>
+{% endblock %}

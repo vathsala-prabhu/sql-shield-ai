@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% block title %}Incident #{{ incident.id }} - SQL SHIELD AI{% endblock %}
+{% block breadcrumb %}Incident Forensics / #{{ incident.id }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+  <div>
+    <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+      <a href="/incidents" style="color:var(--text-secondary); text-decoration:none; font-size:13px;">← Back to Incident Logs</a>
+    </div>
+    <h1 class="page-title">
+      <span>🛡️</span> Security Incident Record #{{ incident.id }}
+    </h1>
+    <p class="page-subtitle">
+      Recorded at {{ incident.timestamp }} UTC by ML Security Perimeter.
+    </p>
+  </div>
+  <div style="display:flex; gap:10px;">
+    <a href="/analyst?incident_id={{ incident.id }}" class="btn btn-primary btn-sm">
+      🤖 Consult AI Security Analyst
+    </a>
+  </div>
+</div>
+
+<div class="grid-sidebar-layout">
+  <!-- Left Column: Primary Forensics -->
+  <div>
+    <!-- Submitted Query Card -->
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>💻</span> Submitted Input String
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="copyToClipboard(document.getElementById('full-query-text').innerText, this)">
+          Copy Query
+        </button>
+      </div>
+      <div class="code-block">
+        <pre><code id="full-query-text">{{ incident.submitted_input }}</code></pre>
+      </div>
+      <div style="display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:8px;">
+        <span>Character Count: {{ incident.submitted_input|length }}</span>
+        <span>Storage: Parameterized SQLite record</span>
+      </div>
+    </div>
+
+    <!-- Threat Analysis & Reasoning Card -->
+    <div class="card" style="margin-bottom: 20px;">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🔬</span> Threat Analysis & Model Reasoning
+        </div>
+        <span class="badge {{ 'badge-block' if incident.action_taken == 'Blocked' else 'badge-allow' }}">
+          {{ incident.action_taken }}
+        </span>
+      </div>
+
+      <div style="font-size:14px; line-height:1.6; color:var(--text-primary); margin-bottom:16px;">
+        <p>{{ incident.explanation }}</p>
+      </div>
+
+      <!-- Probability Gauge -->
+      <div class="score-meter">
+        <div class="score-meter-header">
+          <span>Malicious Probability: <strong>{{ (incident.score * 100)|round|int }}%</strong></span>
+          <span>Threshold: {{ config.DEFAULT_THRESHOLD * 100 }}%</span>
+        </div>
+        <div class="score-track">
+          {% set pct = (incident.score * 100)|round|int %}
+          <div class="score-fill {{ 'high' if pct >= 75 else ('medium' if pct >= 40 else 'low') }}" style="width: {{ pct }}%;"></div>
+        </div>
+      </div>
+
+      <div style="background:var(--bg-secondary); padding:12px 16px; border-radius:6px; font-size:12px; color:var(--text-secondary); margin-top:14px; line-height:1.5;">
+        <strong>Academic Evaluation Note:</strong> Predictions reflect TF-IDF character n-gram (2–5 grams) frequency similarities against trained SQL injection corpus. Substring patterns are diagnostic indicators, not deterministic decision rules.
+      </div>
+    </div>
+
+    <!-- Remediation Guidance Card -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">
+          <span>🛠️</span> Recommended Remediation Strategy
+        </div>
+      </div>
+      <div style="font-size:13px; line-height:1.6; color:var(--text-primary); margin-bottom:16px;">
+        <p>{{ incident.mitigation }}</p>
+      </div>
+
+      <div style="margin-top:14px;">
+        <span style="font-size:12px; font-weight:600; color:var(--accent-cyan); display:block; margin-bottom:8px;">
+          Secure Parameterized Implementation:
+        </span>
+        <div class="code-block">
+<pre><code># Python DB-API / SQLite parameterized example:
+cursor.execute(
+    "SELECT * FROM users WHERE username = ? AND status = 'active'",
+    (user_input,)
+)</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Sidebar: Metadata Summary -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:16px;">
+        <span>📊</span> Incident Metadata
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:12px; font-size:13px;">
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+          <span style="color:var(--text-secondary);">Incident ID:</span>
+          <span style="font-weight:700; color:#fff;">#{{ incident.id }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+          <span style="color:var(--text-secondary);">Timestamp (UTC):</span>
+          <span style="font-family:var(--font-mono); font-size:12px;">{{ incident.timestamp }}</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+          <span style="color:var(--text-secondary);">Predicted Class:</span>
+          <span class="badge {{ 'badge-block' if incident.predicted_class == 'SQLi' else 'badge-allow' }}">
+            {{ incident.predicted_class }}
+          </span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+          <span style="color:var(--text-secondary);">Gateway Decision:</span>
+          <span class="badge {{ 'badge-block' if incident.action_taken == 'Blocked' else 'badge-allow' }}">
+            {{ incident.action_taken }}
+          </span>
+        </div>
+        <div style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-color); padding-bottom:8px;">
+          <span style="color:var(--text-secondary);">Risk Severity:</span>
+          <span class="badge {{ 'badge-block' if incident.severity == 'High' else ('badge-warn' if incident.severity == 'Medium' else 'badge-allow') }}">
+            {{ incident.severity }}
+          </span>
+        </div>
+        <div style="display:flex; justify-content:space-between;">
+          <span style="color:var(--text-secondary);">Model Utilized:</span>
+          <span style="color:var(--accent-cyan); font-weight:600;">{{ incident.model_used }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Analyst Callout Card -->
+    <div class="card" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(59, 130, 246, 0.08)); border-color: rgba(6, 182, 212, 0.3);">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
+        <span style="font-size:22px;">🤖</span>
+        <span style="font-weight:700; color:#fff; font-size:14px;">Need an in-depth briefing?</span>
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); line-height:1.5; margin-bottom:14px;">
+        Our AI Security Analyst can explain this specific syntax vector and generate secure prepared statements tailored to your tech stack.
+      </p>
+      <a href="/analyst?incident_id={{ incident.id }}" class="btn btn-primary btn-sm" style="width:100%;">
+        Open AI Analyst Briefing
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

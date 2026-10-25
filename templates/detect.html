@@ -1,61 +1,115 @@
 {% extends "base.html" %}
-{% block title %}Detect - SQL SHIELD AI{% endblock %}
+{% block title %}Inspect Query - SQL SHIELD AI{% endblock %}
+{% block breadcrumb %}Query Inspection Workbench{% endblock %}
+
 {% block content %}
-<h2>SQL Injection Detection</h2>
-<p class="muted">Paste a SQL query or sample input. It is analyzed by the model and never executed.</p>
+<div class="page-header">
+  <h1 class="page-title">
+    <span>🔍</span> Machine Learning SQL Injection Inspector
+  </h1>
+  <p class="page-subtitle">
+    Input arbitrary SQL statements or HTTP request parameters. The security gateway transforms inputs into character n-gram vectors and evaluates them through the trained model.
+  </p>
+</div>
 
-<textarea id="query" rows="6" placeholder="SELECT * FROM users WHERE id = 1 OR 1=1 --"></textarea>
-<button id="analyze">Analyze</button>
+<!-- Preset Sample Chips -->
+<div class="card" style="margin-bottom: 20px; padding: 18px 24px;">
+  <span style="font-size:12px; color:var(--text-secondary); font-weight:600; display:block; margin-bottom:10px;">
+    ⚡ Quick Test Presets (Click to load):
+  </span>
+  <div class="preset-list" style="margin-bottom: 0;">
+    <button class="preset-chip" data-sample="SELECT id, title, price FROM products WHERE category = 'books' AND in_stock = 1 ORDER BY price ASC">
+      ✓ Legitimate Product Search
+    </button>
+    <button class="preset-chip" data-sample="SELECT * FROM users WHERE username = 'admin' AND password = '' OR '1'='1'">
+      🛑 Auth Bypass (OR '1'='1')
+    </button>
+    <button class="preset-chip" data-sample="' UNION SELECT id, username, password_hash, email FROM admin_users --">
+      🛑 UNION Exfiltration
+    </button>
+    <button class="preset-chip" data-sample="SELECT * FROM members WHERE email = 'john@example.com' AND status = 'active'">
+      ✓ Legitimate Member Lookup
+    </button>
+    <button class="preset-chip" data-sample="1' AND (SELECT 1 FROM (SELECT COUNT(*), CONCAT(version(), FLOOR(RAND(0)*2)) x FROM information_schema.tables GROUP BY x) a) --">
+      🛑 Blind Schema Discovery
+    </button>
+    <button class="preset-chip" data-sample="1; WAITFOR DELAY '0:0:5'--">
+      🛑 Stacked Time Delay
+    </button>
+  </div>
+</div>
 
-<div id="result" class="result hidden"></div>
+<div class="grid-sidebar-layout">
+  <!-- Query Input Workspace -->
+  <div class="card">
+    <div class="form-group">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <label for="detect-query" class="form-label" style="margin-bottom:0;">SQL Statement / Web Request Input:</label>
+        <span style="font-size:11px; color:var(--text-muted);">Never executed directly against raw database</span>
+      </div>
+      <textarea id="detect-query" class="form-control" rows="8" placeholder="Enter raw SQL or web parameter here, e.g.:&#10;SELECT * FROM accounts WHERE id = 101 OR 1=1 --"></textarea>
+    </div>
 
-<script>
-const btn = document.getElementById("analyze");
-const box = document.getElementById("result");
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+      <div style="display:flex; gap:10px; align-items:center;">
+        <button id="btn-analyze" class="btn btn-primary">
+          <span>Inspect Request</span>
+        </button>
+        <button class="btn btn-secondary" onclick="document.getElementById('detect-query').value = ''; document.getElementById('detect-result').style.display='none';">
+          Clear
+        </button>
+      </div>
+      <span style="font-size:12px; color:var(--text-muted);">
+        Max length: {{ config.MAX_QUERY_LEN }} characters
+      </span>
+    </div>
 
-function line(label, value) {
-  const p = document.createElement("p");
-  const b = document.createElement("strong");
-  b.textContent = label + ": ";
-  p.appendChild(b);
-  p.appendChild(document.createTextNode(value));
-  box.appendChild(p);
-}
+    <!-- Live Result Container (Populated by JS) -->
+    <div id="detect-result" class="result-box" style="display:none;"></div>
+  </div>
 
-btn.addEventListener("click", async () => {
-  const query = document.getElementById("query").value;
-  box.className = "result";
-  box.textContent = "Analyzing...";
-  btn.disabled = true;
-  try {
-    const res = await fetch("/api/detect", {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({query})
-    });
-    const data = await res.json();
-    if (!res.ok) {
-      box.className = "result error";
-      box.textContent = data.error || "Request failed.";
-      return;
-    }
-    box.className = "result " + (data.action === "Blocked" ? "blocked" : "allowed");
-    box.textContent = "";
-    const h = document.createElement("h3");
-    h.textContent = data.action === "Blocked" ? "Potential SQL Injection (Blocked)" : "Legitimate (Allowed)";
-    box.appendChild(h);
-    line("Score", data.score);
-    line("Severity", data.severity);
-    line("Incident ID", data.incident_id);
-    if (data.patterns.length) line("Patterns to review", data.patterns.join(", "));
-    line("Explanation", data.explanation);
-    line("Mitigation", data.mitigation);
-  } catch (e) {
-    box.className = "result error";
-    box.textContent = "Could not reach the server.";
-  } finally {
-    btn.disabled = false;
-  }
-});
-</script>
+  <!-- Gateway Parameters Sidebar -->
+  <div style="display:flex; flex-direction:column; gap:20px;">
+    <div class="card">
+      <div class="card-title" style="margin-bottom:14px;">
+        <span>⚙️</span> Inspection Controls
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Classification Model:</label>
+        <select id="model-select" class="form-control">
+          <option value="selected_model" selected>Random Forest (Recommended / Selected)</option>
+          <option value="random_forest">Random Forest Classifier (100 Trees)</option>
+          <option value="xgboost">XGBoost Classifier (Binary Logistic)</option>
+        </select>
+        <span style="font-size:11px; color:var(--text-muted); display:block; margin-top:4px;">
+          Both models will be scored side-by-side.
+        </span>
+      </div>
+
+      <div class="form-group" style="margin-bottom: 0;">
+        <div style="display:flex; justify-content:space-between; font-size:13px; margin-bottom:6px;">
+          <label class="form-label" style="margin-bottom:0;">Blocking Threshold:</label>
+          <span id="threshold-value" style="font-family:var(--font-mono); font-weight:700; color:var(--accent-cyan);">{{ config.DEFAULT_THRESHOLD }}</span>
+        </div>
+        <input type="range" id="threshold-slider" min="0.10" max="0.95" step="0.05" value="{{ config.DEFAULT_THRESHOLD }}" style="width:100%; accent-color:var(--accent-cyan); cursor:pointer;">
+        <div style="display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:4px;">
+          <span>0.10 (Aggressive)</span>
+          <span>0.50 (Standard)</span>
+          <span>0.95 (Permissive)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Defensive Reminder Card -->
+    <div class="card" style="background: rgba(6, 182, 212, 0.04); border-color: rgba(6, 182, 212, 0.2);">
+      <div style="font-size:13px; font-weight:600; color:var(--accent-cyan); margin-bottom:6px;">
+        💡 Defense-in-Depth Principle
+      </div>
+      <p style="font-size:12px; color:var(--text-secondary); line-height:1.5;">
+        Machine Learning detection operates as an external perimeter filter. It does not replace <strong>Parameterized Queries (Prepared Statements)</strong> and <strong>Principle of Least Privilege</strong> at the database engine tier.
+      </p>
+    </div>
+  </div>
+</div>
 {% endblock %}

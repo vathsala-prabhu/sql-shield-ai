@@ -1,0 +1,177 @@
+{% extends "base.html" %}
+{% block title %}Safe Attack Simulation - SQL SHIELD AI{% endblock %}
+{% block breadcrumb %}Controlled Attack Simulation Matrix{% endblock %}
+
+{% block content %}
+<div class="page-header" style="display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:16px;">
+  <div>
+    <h1 class="page-title">
+      <span>⚡</span> Safe Attack Simulation Matrix
+    </h1>
+    <p class="page-subtitle">
+      Demonstration test cases evaluated in a sandboxed runtime. Harmless payloads test the boundary resilience of the ML classifier.
+    </p>
+  </div>
+  <button id="btn-run-all-sim" class="btn btn-primary">
+    <span>Run Full Test Suite (Sequential)</span>
+  </button>
+</div>
+
+<!-- Category 1: Legitimate Enterprise Queries -->
+<div style="margin-bottom: 24px;">
+  <div style="font-size:15px; font-weight:700; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+    <span style="color:var(--status-allow);">✓</span> Category 1: Legitimate Application Queries (Expected: Allowed)
+  </div>
+
+  <div class="sim-card" data-query="SELECT id, username, email FROM users WHERE status = 'active' AND verified = 1">
+    <div class="sim-info">
+      <div class="sim-name">User Account Lookup</div>
+      <div class="sim-query">SELECT id, username, email FROM users WHERE status = 'active' AND verified = 1</div>
+      <div class="sim-meta">Standard parameterized-style query with multiple conditions</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+
+  <div class="sim-card" data-query="SELECT p.name, p.price, c.category_name FROM products p JOIN categories c ON p.cat_id = c.id WHERE p.price BETWEEN 20 AND 100 ORDER BY p.price ASC LIMIT 10">
+    <div class="sim-info">
+      <div class="sim-name">Complex JOIN & Pagination Query</div>
+      <div class="sim-query">SELECT p.name, p.price, c.category_name FROM products p JOIN categories c ON p.cat_id = c.id WHERE p.price BETWEEN 20 AND 100 ORDER BY p.price ASC LIMIT 10</div>
+      <div class="sim-meta">Enterprise relational query with JOIN, BETWEEN, and ORDER BY</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+
+  <div class="sim-card" data-query="INSERT INTO audit_logs (user_id, action, ip_address, created_at) VALUES (42, 'login_success', '192.168.1.10', '2026-10-25 10:00:00')">
+    <div class="sim-info">
+      <div class="sim-name">Audit Log Insertion</div>
+      <div class="sim-query">INSERT INTO audit_logs (user_id, action, ip_address, created_at) VALUES (42, 'login_success', '192.168.1.10', '2026-10-25 10:00:00')</div>
+      <div class="sim-meta">Benign INSERT statement with quoted strings and dates</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category 2: Authentication Bypass (Tautology) -->
+<div style="margin-bottom: 24px;">
+  <div style="font-size:15px; font-weight:700; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+    <span style="color:var(--status-block);">🛑</span> Category 2: Authentication Bypass via Tautology (Expected: Blocked)
+  </div>
+
+  <div class="sim-card" data-query="SELECT * FROM users WHERE username = 'admin' AND password = '' OR '1'='1'">
+    <div class="sim-info">
+      <div class="sim-name">Classic 'OR 1=1' Authentication Bypass</div>
+      <div class="sim-query">SELECT * FROM users WHERE username = 'admin' AND password = '' OR '1'='1'</div>
+      <div class="sim-meta">Forces WHERE clause to evaluate to TRUE, returning first user row (usually admin)</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+
+  <div class="sim-card" data-query="admin' OR 1=1--">
+    <div class="sim-info">
+      <div class="sim-name">Compact Web Form Parameter Injection</div>
+      <div class="sim-query">admin' OR 1=1--</div>
+      <div class="sim-meta">Triggers quotation breakout with immediate comment truncation</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category 3: UNION-based Exfiltration -->
+<div style="margin-bottom: 24px;">
+  <div style="font-size:15px; font-weight:700; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+    <span style="color:var(--status-block);">🛑</span> Category 3: UNION Data Exfiltration (Expected: Blocked)
+  </div>
+
+  <div class="sim-card" data-query="' UNION SELECT 1, username, password_hash, email FROM admin_credentials --">
+    <div class="sim-info">
+      <div class="sim-name">UNION Query Result Set Hijacking</div>
+      <div class="sim-query">' UNION SELECT 1, username, password_hash, email FROM admin_credentials --</div>
+      <div class="sim-meta">Combines original result with sensitive credential table</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+
+  <div class="sim-card" data-query="1 UNION ALL SELECT null, table_name, column_name FROM information_schema.columns WHERE table_schema=database()--">
+    <div class="sim-info">
+      <div class="sim-name">Schema Metadata Reconnaissance</div>
+      <div class="sim-query">1 UNION ALL SELECT null, table_name, column_name FROM information_schema.columns WHERE table_schema=database()--</div>
+      <div class="sim-meta">Exfiltrates database catalog structure using information_schema</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+</div>
+
+<!-- Category 4: Blind, Time-Delay & Obfuscation -->
+<div style="margin-bottom: 24px;">
+  <div style="font-size:15px; font-weight:700; color:#fff; margin-bottom:12px; display:flex; align-items:center; gap:8px;">
+    <span style="color:var(--status-block);">🛑</span> Category 4: Blind Time-Delay & Comment Evasion (Expected: Blocked)
+  </div>
+
+  <div class="sim-card" data-query="1; WAITFOR DELAY '0:0:5'--">
+    <div class="sim-info">
+      <div class="sim-name">MSSQL Stacked Time-Delay (WAITFOR)</div>
+      <div class="sim-query">1; WAITFOR DELAY '0:0:5'--</div>
+      <div class="sim-meta">Executes a 5-second sleep to confirm blind injection without visible error output</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+
+  <div class="sim-card" data-query="1' AND (SELECT 9999 FROM (SELECT(SLEEP(5)))a)--">
+    <div class="sim-info">
+      <div class="sim-name">MySQL Sleep-Based Subquery</div>
+      <div class="sim-query">1' AND (SELECT 9999 FROM (SELECT(SLEEP(5)))a)--</div>
+      <div class="sim-meta">Forces sleep invocation nested in an AND expression</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+
+  <div class="sim-card" data-query="admin'/*arbitrary_comment*/OR/*inline_evasion*/1=1/*tail*/--">
+    <div class="sim-info">
+      <div class="sim-name">Inline Comment Obfuscation (WAF Evasion)</div>
+      <div class="sim-query">admin'/*arbitrary_comment*/OR/*inline_evasion*/1=1/*tail*/--</div>
+      <div class="sim-meta">Attempts to break traditional regex signature matchers with interleaved /*comments*/</div>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <div class="sim-score-pill"></div>
+      <div class="sim-status-pill"><span class="badge badge-neutral">Ready</span></div>
+      <button class="btn btn-secondary btn-sm btn-sim-run">Test</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
