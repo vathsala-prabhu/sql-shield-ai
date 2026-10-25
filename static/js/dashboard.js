@@ -331,11 +331,22 @@ function setupAnalystPage() {
       }
 
       const formattedHtml = formatMarkdown(data.analysis);
+      const modeLabels = {
+        gemini_api: "Gemini AI Assistant",
+        groq_api: "Groq AI Assistant",
+        local_provider_unavailable: "AI provider unavailable",
+        rule_based_fallback: "Local Security Engine",
+      };
+      const modeLabel = modeLabels[data.mode] || "Local Security Engine";
+      const providerNote = data.note
+        ? `<div style="margin-bottom:12px;color:var(--text-secondary);font-size:12px;">${data.note}</div>`
+        : "";
       outputContainer.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--border-color);">
-          <span class="badge badge-cyan">Mode: ${data.mode === 'gemini_api' ? 'Gemini AI Assistant' : 'Local Security Engine'}</span>
+          <span class="badge badge-cyan">Mode: ${modeLabel}</span>
           <button class="btn btn-secondary btn-sm" onclick="copyToClipboard(document.getElementById('raw-analyst-content').innerText, this)">Copy Report</button>
         </div>
+        ${providerNote}
         <div id="raw-analyst-content" style="display:none;">${data.analysis}</div>
         <div class="analyst-output">${formattedHtml}</div>
       `;

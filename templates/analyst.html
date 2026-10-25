@@ -18,15 +18,19 @@
     <div style="display:flex; align-items:center; gap:10px;">
       <span style="font-size:18px;">💡</span>
       <span style="font-size:13px; color:var(--text-secondary);">
-        {% if config.GEMINI_API_KEY %}
-        <strong>Active Provider:</strong> Google Gemini API ({{ config.GEMINI_MODEL }}) with automatic sensitive data redaction.
+        {% if config.GEMINI_API_KEY and config.GROQ_API_KEY %}
+        <strong>Provider order:</strong> Google Gemini ({{ config.GEMINI_MODEL }}) → Groq ({{ config.GROQ_MODEL }}), with automatic sensitive data redaction.
+        {% elif config.GEMINI_API_KEY %}
+        <strong>Configured provider:</strong> Google Gemini API ({{ config.GEMINI_MODEL }}) with automatic sensitive data redaction.
+        {% elif config.GROQ_API_KEY %}
+        <strong>Configured provider:</strong> Groq API ({{ config.GROQ_MODEL }}) with automatic sensitive data redaction.
         {% else %}
-        <strong>Active Provider:</strong> Intelligent Local Fallback Engine (Zero external network dependencies / API key not set).
+        <strong>Active Provider:</strong> Intelligent Local Fallback Engine (Zero external network dependencies / API keys not set).
         {% endif %}
       </span>
     </div>
-    <span class="badge {{ 'badge-cyan' if config.GEMINI_API_KEY else 'badge-neutral' }}">
-      {{ 'Online AI Mode' if config.GEMINI_API_KEY else 'Local Rule Engine Mode' }}
+    <span class="badge {{ 'badge-cyan' if (config.GEMINI_API_KEY or config.GROQ_API_KEY) else 'badge-neutral' }}">
+      {{ 'Online AI Mode' if (config.GEMINI_API_KEY or config.GROQ_API_KEY) else 'Local Rule Engine Mode' }}
     </span>
   </div>
 </div>

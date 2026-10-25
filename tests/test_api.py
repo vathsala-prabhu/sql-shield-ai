@@ -1,6 +1,7 @@
 import sys
 from pathlib import Path
 import unittest
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parent.parent
 if str(ROOT) not in sys.path:
@@ -55,10 +56,14 @@ class TestAPI(unittest.TestCase):
         self.assertIn("test", data)
 
     def test_security_analyst_endpoint(self):
-        res = self.client.post("/api/security-analyst", json={
-            "query": "SELECT * FROM users WHERE id = 1 OR 1=1 --",
-            "question": "How do I fix this in Python?"
-        })
+        with patch("app.analyze_incident", return_value={
+            "mode": "gemini_api",
+            "analysis": "Use Prepared Statements for user-supplied values.",
+        }):
+            res = self.client.post("/api/security-analyst", json={
+                "query": "SELECT * FROM users WHERE id = 1 OR 1=1 --",
+                "question": "How do I fix this in Python?"
+            })
         self.assertEqual(res.status_code, 200)
         data = res.get_json()
         self.assertIn("analysis", data)
