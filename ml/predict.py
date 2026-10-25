@@ -1,3 +1,4 @@
+import re
 import sys
 from pathlib import Path
 import joblib
@@ -18,6 +19,17 @@ _CACHE = {
     "xgboost": None,
 }
 
+# Regex patterns to isolate potential injection fragments within compound queries.
+# This defends against Benign Prefix Camouflage (where a 60+ char standard query dilutes
+# the TF-IDF feature weights of a 10-char injection payload like OR '1'='1').
+INJECTION_SEGMENT_PATTERNS = [
+    re.compile(r"\b(?:or|and)\b\s+(['\"]?)([\w]+)\1\s*=\s*\1\2\1.*", re.IGNORECASE),
+    re.compile(r"\bunion\s+(?:all\s+)?select\b.*", re.IGNORECASE),
+    re.compile(r";\s*(?:drop|select|insert|update|delete|exec|alter)\b.*", re.IGNORECASE),
+    re.compile(r"\b(?:sleep|waitfor\s+delay|pg_sleep|benchmark)\s*\(.*", re.IGNORECASE),
+    re.compile(r"--.*|/\*.*?\*/|#.*", re.IGNORECASE),
+]
+
 
 def _get_vectorizer():
     if _CACHE["vectorizer"] is None:
@@ -35,9 +47,26 @@ def _get_model(model_name="selected_model"):
     return _CACHE[model_name]
 
 
+def extract_segments(text):
+    """
+    Extracts the full query and any candidate injection payload fragments.
+    Allows the fitted vectorizer and model to inspect both global context
+    and localized payload structures without dilution.
+    """
+    segments = [str(text)]
+    for pat in INJECTION_SEGMENT_PATTERNS:
+        for match in pat.finditer(text):
+            frag = match.group(0).strip()
+            if frag and frag not in segments:
+                segments.append(frag)
+    return segments
+
+
 def predict_query(text, threshold=None, model_name=None, compare_both=True):
     """
-    Transforms text using character n-gram TF-IDF and classifies it using the trained model.
+    Transforms text using the fitted character n-gram TF-IDF vectorizer and classifies
+    it using the trained model. Evaluates full query and suspicious sub-clauses to prevent
+    benign prefix camouflage from masking injection vectors.
     
     Args:
         text (str): SQL query or input string to inspect.
@@ -54,33 +83,45 @@ def predict_query(text, threshold=None, model_name=None, compare_both=True):
         model_name = config.ACTIVE_MODEL
 
     vectorizer = _get_vectorizer()
-    X = vectorizer.transform([str(text)])
+    segments = extract_segments(text)
+    X = vectorizer.transform(segments)
 
     active_model = _get_model(model_name)
-    score = float(active_model.predict_proba(X)[0][1])
-    label = "SQLi" if score >= threshold else "Legitimate"
+    # predict_proba returns [prob_legitimate (class 0), prob_sqli (class 1)]
+    probs = active_model.predict_proba(X)
+    sqli_probs = probs[:, 1]
+
+    # Overall score is the maximum malicious probability across full query and payload segments
+    max_score = float(max(sqli_probs))
+    full_score = float(sqli_probs[0])
+    label = "SQLi" if max_score >= threshold else "Legitimate"
 
     result = {
         "label": label,
-        "score": round(score, 4),
+        "score": round(max_score, 4),
+        "full_query_score": round(full_score, 4),
         "threshold": threshold,
         "model_used": model_name,
+        "segments_evaluated": len(segments),
     }
 
     if compare_both:
         try:
             rf_model = _get_model("random_forest")
             xgb_model = _get_model("xgboost")
-            rf_score = float(rf_model.predict_proba(X)[0][1])
-            xgb_score = float(xgb_model.predict_proba(X)[0][1])
+            rf_probs = rf_model.predict_proba(X)[:, 1]
+            xgb_probs = xgb_model.predict_proba(X)[:, 1]
+            rf_max = float(max(rf_probs))
+            xgb_max = float(max(xgb_probs))
+
             result["comparisons"] = {
                 "random_forest": {
-                    "score": round(rf_score, 4),
-                    "label": "SQLi" if rf_score >= threshold else "Legitimate",
+                    "score": round(rf_max, 4),
+                    "label": "SQLi" if rf_max >= threshold else "Legitimate",
                 },
                 "xgboost": {
-                    "score": round(xgb_score, 4),
-                    "label": "SQLi" if xgb_score >= threshold else "Legitimate",
+                    "score": round(xgb_max, 4),
+                    "label": "SQLi" if xgb_max >= threshold else "Legitimate",
                 },
             }
         except Exception:
@@ -93,6 +134,7 @@ if __name__ == "__main__":
     samples = [
         "SELECT name FROM users WHERE id = 5",
         "SELECT * FROM users WHERE id = 1 OR 1=1 --",
+        "SELECT * FROM users WHERE username = 'admin' AND password = '' OR '1'='1'",
         "' UNION SELECT username, password FROM users --",
     ]
     for s in samples:

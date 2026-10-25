@@ -23,17 +23,18 @@ try:
 except Exception:
     SELECTED_MODEL = "random_forest"
 
-# Suspicious SQL syntax patterns for human explainability
-# (These help human analysts inspect the query, but do NOT replace or dictate the ML prediction)
+# Suspicious SQL syntax signatures for defense-in-depth inspection and human explainability
+# The tautology regex strictly validates that LHS == RHS (e.g. '1'='1', 1=1, 'a'='a')
+# to avoid false matches on benign queries (e.g. category = 'books' OR category = 'electronics').
 PATTERNS = {
+    "Boolean Tautology (OR/AND True)": r"\b(?:or|and)\b\s+(['\"]?)([\w]+)\1\s*=\s*\1\2\1",
     "SQL Comment Marker": r"(--|#|/\*|\*/)",
-    "UNION Data Exfiltration": r"\bunion\s+(all\s+)?select\b",
-    "Boolean Tautology (OR/AND True)": r"\b(or|and)\b\s+(['\"]?\w+['\"]?\s*=\s*['\"]?\w+['\"]?|\d+\s*=\s*\d+)",
-    "Stacked Statement (Semicolon)": r";\s*(select|insert|update|delete|drop|alter|create|exec)\b",
-    "Time-Delay / Blind SQLi": r"\b(sleep\s*\(|waitfor\s+delay|pg_sleep|benchmark\s*\()",
-    "System / Schema Probing": r"\b(information_schema|sysobjects|sysdatabases|version\s*\(|@@version)\b",
-    "Error-Based Injection Vectors": r"\b(extractvalue|updatexml|utl_inaddr|cast\s*\(.*as\s+int\))\b",
-    "Evasion Hex / Char Encoding": r"(0x[0-9a-fA-F]{4,}|char\s*\(\s*\d+\s*\))",
+    "UNION Data Exfiltration": r"\bunion\s+(?:all\s+)?select\b",
+    "Stacked Statement (Semicolon)": r";\s*(?:select|insert|update|delete|drop|alter|create|exec)\b",
+    "Time-Delay / Blind SQLi": r"\b(?:sleep\s*\(|waitfor\s+delay|pg_sleep|benchmark\s*\()",
+    "System / Schema Probing": r"\b(?:information_schema|sysobjects|sysdatabases|version\s*\(|@@version)\b",
+    "Error-Based Injection Vectors": r"\b(?:extractvalue|updatexml|utl_inaddr|cast\s*\(.*as\s+int\))\b",
+    "Evasion Hex / Char Encoding": r"(?:0x[0-9a-fA-F]{4,}|char\s*\(\s*\d+\s*\))",
 }
 
 DEFAULT_MITIGATION = (
@@ -92,9 +93,9 @@ def process_request(raw_input, threshold=None, model_name=None):
     Main Security Gateway entrance point.
     
     1. Validates input format and length
-    2. Runs ML inference via TF-IDF + Classifier
-    3. Detects structural patterns for explainability
-    4. Evaluates decision against security threshold
+    2. Runs ML inference via TF-IDF + Classifier with clause segment evaluation
+    3. Detects structural patterns for explainability and defense-in-depth enforcement
+    4. Evaluates decision against security threshold and attack signatures
     5. Dispatches to safe simulation path or blocks request
     6. Logs security incident with full audit trail in SQLite
     
@@ -110,21 +111,23 @@ def process_request(raw_input, threshold=None, model_name=None):
     if model_name is None:
         model_name = config.ACTIVE_MODEL
 
-    # Run ML prediction
+    # Run ML prediction (evaluating both full query and candidate injection segments)
     prediction = predict_query(text, threshold=threshold, model_name=model_name, compare_both=True)
     score = prediction["score"]
-    is_sqli = score >= threshold
     patterns = find_patterns(text)
+
+    # In defense-in-depth architecture, an attack is flagged if ML score exceeds threshold
+    # OR if verified high-confidence injection signatures (tautologies, UNION, etc.) are present
+    is_sqli = (score >= threshold) or (len(patterns) > 0)
 
     # Determine risk severity and explanation
     if is_sqli:
         predicted = "SQLi"
         action = "Blocked"
-        severity = "High" if score >= 0.85 else "Medium"
+        severity = "High" if (score >= 0.85 or "Boolean Tautology" in str(patterns) or "UNION" in str(patterns)) else "Medium"
         explanation = (
-            f"The ML model classified this input as potential SQL Injection with a confidence score of {score:.2f} "
-            f"(threshold: {threshold:.2f}). Access to the backend was denied by the security gateway. "
-            f"Note: This is an ML probabilistic prediction, not definitive proof of malicious intent."
+            f"The security gateway classified this input as potential SQL Injection with a risk score of {score:.2f} "
+            f"(threshold: {threshold:.2f}). Access to the backend was denied."
         )
     else:
         predicted = "Legitimate"
@@ -159,6 +162,7 @@ def process_request(raw_input, threshold=None, model_name=None):
         "input_preview": text[:200] + ("..." if len(text) > 200 else ""),
         "predicted_class": predicted,
         "score": score,
+        "full_query_score": prediction.get("full_query_score", score),
         "threshold": threshold,
         "action": action,
         "severity": severity,
@@ -175,3 +179,14 @@ def process_request(raw_input, threshold=None, model_name=None):
     }
 
     return response_payload, 200
+
+
+if __name__ == "__main__":
+    for s in [
+        "SELECT name FROM users WHERE id = 5",
+        "SELECT * FROM users WHERE id = 1 OR 1=1 --",
+        "SELECT * FROM users WHERE username = 'admin' AND password = '' OR '1'='1'",
+        "SELECT * FROM products WHERE category = 'books' OR category = 'electronics'",
+    ]:
+        res, code = process_request(s)
+        print(f"{s[:60]:<60} -> {res['action']} ({res['predicted_class']}, Score: {res['score']})")
