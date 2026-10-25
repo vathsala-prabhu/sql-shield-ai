@@ -1,6 +1,6 @@
 {
   "selected_model": "random_forest",
-  "selection_rule": "highest SQLi recall on validation, then F1",
+  "selection_rule": "Highest SQL injection recall on validation, then F1-score",
   "validation": {
     "random_forest": {
       "accuracy": 0.9978364344439636,
