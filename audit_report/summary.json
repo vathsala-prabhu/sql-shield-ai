@@ -1,0 +1,170 @@
+{
+  "audit_metadata": {
+    "audit_timestamp": "2026-10-25T21:28:00+05:30",
+    "auditor_role": "Senior Machine Learning Engineer & Security ML Auditor",
+    "project_name": "SQL Shield AI - ML SQL Injection Detection Pipeline",
+    "repository_root": "c:\\sql-shield-ai"
+  },
+  "dataset_counts_and_splits": {
+    "raw_dataset": {
+      "filename": "data/Modified_SQL_Dataset.csv",
+      "total_records": 30919,
+      "legitimate_count": 19537,
+      "sqli_count": 11382,
+      "null_queries": 0,
+      "null_labels": 0,
+      "exact_duplicate_rows": 12,
+      "exact_duplicate_queries": 14,
+      "conflicting_label_queries": 2
+    },
+    "clean_dataset": {
+      "filename": "data/clean_dataset.csv",
+      "total_records": 30814,
+      "legitimate_count": 19504,
+      "sqli_count": 11310,
+      "conflicting_labels_remaining": 0,
+      "exact_duplicate_queries_remaining": 0
+    },
+    "partitions": {
+      "train": {
+        "filename": "data/train.csv",
+        "total": 21569,
+        "ratio": 0.7000,
+        "legitimate": 13652,
+        "sqli": 7917,
+        "sqli_prevalence": 0.3671
+      },
+      "validation": {
+        "filename": "data/val.csv",
+        "total": 4622,
+        "ratio": 0.1500,
+        "legitimate": 2926,
+        "sqli": 1696,
+        "sqli_prevalence": 0.3669
+      },
+      "test": {
+        "filename": "data/test.csv",
+        "total": 4623,
+        "ratio": 0.1500,
+        "legitimate": 2926,
+        "sqli": 1697,
+        "sqli_prevalence": 0.3671
+      }
+    }
+  },
+  "model_identifiers": {
+    "random_forest": {
+      "artifact": "models/random_forest.joblib",
+      "sha256": "e6fd89ef25a7b3016ff8936e736faf9176662c6800310fc9da73362f1b820cc3",
+      "size_bytes": 7655993,
+      "class": "RandomForestClassifier",
+      "n_estimators": 100,
+      "max_depth": null,
+      "random_state": 42
+    },
+    "xgboost": {
+      "artifact": "models/xgboost.joblib",
+      "sha256": "d0ed4248c3a15455e9048700164fef249023b22a848bc991f82e1f7033bccfd3",
+      "size_bytes": 147444,
+      "class": "XGBClassifier",
+      "num_boosted_rounds": 100,
+      "scale_pos_weight": 1.7243905519767588,
+      "random_state": 42
+    },
+    "selected_model": {
+      "artifact": "models/selected_model.joblib",
+      "sha256": "899878dd17652c00e5c9236872c3d66ddcf417a1c8b34f03f027728c3c78f479",
+      "size_bytes": 7656249,
+      "selected_architecture": "random_forest",
+      "identity_with_random_forest": {
+        "predictions_identical": true,
+        "probabilities_identical": true
+      }
+    },
+    "tfidf_vectorizer": {
+      "artifact": "models/tfidf_vectorizer.joblib",
+      "sha256": "c509f6758192792d13d86dafd2f4818f0cc989391437144cd78a67e95ac81586",
+      "size_bytes": 679502,
+      "vocabulary_size": 20000,
+      "analyzer": "char",
+      "ngram_range": [2, 5],
+      "max_features": 20000,
+      "lowercase": true,
+      "norm": "l2",
+      "use_idf": true,
+      "smooth_idf": true
+    }
+  },
+  "leakage_audit_summary": {
+    "split_id_overlap": {
+      "status": "PASS",
+      "evidence": "Exact and normalized string sets across train, val, and test have 0 overlap."
+    },
+    "tfidf_fitting_leakage": {
+      "status": "PASS",
+      "evidence": "Saved vectorizer vocabulary and IDF weights exactly match a fresh fit on train.csv (0 differences). Difference with full clean dataset fit is 1,666 features."
+    },
+    "duplicate_leakage": {
+      "status": "PASS",
+      "evidence": "Near-duplicates (lowercased + collapsed whitespace) purged before splitting (103 near-duplicate queries dropped). 0 duplicate overlap across splits."
+    },
+    "template_syntactic_overlap": {
+      "status": "WARNING",
+      "evidence": "250 structural query templates (with normalized strings/numbers) are shared between train and test. While exact records do not overlap, high template similarity contributes to near-100% benchmark metrics."
+    },
+    "label_target_leakage": {
+      "status": "PASS",
+      "evidence": "Only SQL query text is transformed. No metadata, IDs, or target columns passed into feature extractor."
+    },
+    "test_set_reuse": {
+      "status": "PASS",
+      "evidence": "Model selection strictly executed on validation metrics (highest SQLi recall then F1). Test set evaluated post-selection."
+    }
+  },
+  "metric_verification": {
+    "validation": {
+      "random_forest": {
+        "cm": {"tn": 2922, "fp": 4, "fn": 6, "tp": 1690},
+        "accuracy": 0.997836,
+        "precision": 0.997639,
+        "recall": 0.996462,
+        "f1": 0.997050,
+        "verified_against_saved": true
+      },
+      "xgboost": {
+        "cm": {"tn": 2922, "fp": 4, "fn": 14, "tp": 1682},
+        "accuracy": 0.996106,
+        "precision": 0.997628,
+        "recall": 0.991745,
+        "f1": 0.994678,
+        "verified_against_saved": true
+      }
+    },
+    "test": {
+      "random_forest": {
+        "cm": {"tn": 2923, "fp": 3, "fn": 15, "tp": 1682},
+        "accuracy": 0.996106,
+        "precision": 0.998220,
+        "recall": 0.991161,
+        "f1": 0.994678,
+        "verified_against_saved": true
+      },
+      "xgboost": {
+        "cm": {"tn": 2925, "fp": 1, "fn": 21, "tp": 1676},
+        "accuracy": 0.995241,
+        "precision": 0.999404,
+        "recall": 0.987625,
+        "f1": 0.993480,
+        "verified_against_saved": true
+      }
+    }
+  },
+  "critical_audit_findings": [
+    "No classic data leakage was detected: train/val/test splits are mutually exclusive and TF-IDF was fitted strictly on train.csv.",
+    "Model selection rule in code strictly followed validation recall then F1, correctly choosing Random Forest without test set snooping.",
+    "Benign Prefix Camouflage Vulnerability: Raw TF-IDF Random Forest fails (score 0.42, False Negative) when an injection payload is embedded inside a long legitimate SQL query due to token dilution. Runtime app patches this with regex segment extraction.",
+    "Encoding & Obfuscation Vulnerabilities: Hex-encoded payloads (e.g. 0x61646d696e) bypass both raw models and regex segmenters (0% detection).",
+    "False Positive Risks on Non-English/Natural Language: Natural words containing SQL character n-grams (e.g. Catalan 'fogars de la selva' matching ' sel') trigger false alarms."
+  ],
+  "final_audit_conclusion": "VALIDATED_WITH_OPERATIONAL_CONSTRAINTS"
+}

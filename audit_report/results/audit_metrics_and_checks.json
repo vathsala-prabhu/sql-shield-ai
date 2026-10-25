@@ -1,0 +1,969 @@
+{
+  "counts": {
+    "raw": {
+      "total": 30919,
+      "columns": [
+        "Query",
+        "Label"
+      ],
+      "null_queries": 0,
+      "null_labels": 0,
+      "exact_duplicate_rows": 12,
+      "exact_duplicate_queries": 14,
+      "label_distribution": {
+        "0": 19537,
+        "1": 11382
+      }
+    },
+    "clean": {
+      "total": 30814,
+      "columns": [
+        "Query",
+        "label",
+        "y"
+      ],
+      "exact_duplicate_queries": 0,
+      "label_distribution": {
+        "Legitimate": 19504,
+        "SQLi": 11310
+      },
+      "y_distribution": {
+        "0": 19504,
+        "1": 11310
+      }
+    },
+    "train": {
+      "total": 21569,
+      "y_distribution": {
+        "0": 13652,
+        "1": 7917
+      },
+      "pos_ratio": 0.36705456905744355
+    },
+    "val": {
+      "total": 4622,
+      "y_distribution": {
+        "0": 2926,
+        "1": 1696
+      },
+      "pos_ratio": 0.3669407183037646
+    },
+    "test": {
+      "total": 4623,
+      "y_distribution": {
+        "0": 2926,
+        "1": 1697
+      },
+      "pos_ratio": 0.3670776552022496
+    }
+  },
+  "split_leakage": {
+    "exact_overlap": {
+      "train_val_count": 0,
+      "train_test_count": 0,
+      "val_test_count": 0
+    },
+    "normalized_overlap": {
+      "train_val_count": 0,
+      "train_test_count": 0,
+      "val_test_count": 0
+    }
+  },
+  "conflicts_in_raw": {
+    "count": 2,
+    "examples": [
+      "#name?",
+      "1"
+    ]
+  },
+  "conflicts_in_clean": 0,
+  "tfidf_audit": {
+    "saved_vocab_len": 20000,
+    "fresh_train_vocab_len": 20000,
+    "symmetric_diff_with_train_fit": 0,
+    "symmetric_diff_with_full_clean_fit": 1666,
+    "idf_vector_len": 20000,
+    "idf_match_train_fit": true,
+    "idf_match_full_fit": false
+  },
+  "recomputed_metrics": {
+    "val": {
+      "random_forest": {
+        "tn": 2922,
+        "fp": 4,
+        "fn": 6,
+        "tp": 1690,
+        "accuracy": 0.9978364344439636,
+        "precision": 0.9976387249114522,
+        "recall": 0.9964622641509434,
+        "f1": 0.9970501474926254,
+        "specificity": 0.9986329460013671,
+        "fpr": 0.001367053998632946,
+        "fnr": 0.003537735849056604,
+        "roc_auc": 0.9995464983750113,
+        "pr_auc": 0.9995151657409537
+      },
+      "xgboost": {
+        "tn": 2922,
+        "fp": 4,
+        "fn": 14,
+        "tp": 1682,
+        "accuracy": 0.9961055819991346,
+        "precision": 0.9976275207591934,
+        "recall": 0.9917452830188679,
+        "f1": 0.9946777054997042,
+        "specificity": 0.9986329460013671,
+        "fpr": 0.001367053998632946,
+        "fnr": 0.008254716981132075,
+        "roc_auc": 0.9996029215942946,
+        "pr_auc": 0.9994481938172763
+      },
+      "selected_model": {
+        "tn": 2922,
+        "fp": 4,
+        "fn": 6,
+        "tp": 1690,
+        "accuracy": 0.9978364344439636,
+        "precision": 0.9976387249114522,
+        "recall": 0.9964622641509434,
+        "f1": 0.9970501474926254,
+        "specificity": 0.9986329460013671,
+        "fpr": 0.001367053998632946,
+        "fnr": 0.003537735849056604,
+        "roc_auc": 0.9995464983750113,
+        "pr_auc": 0.9995151657409537
+      }
+    },
+    "test": {
+      "random_forest": {
+        "tn": 2923,
+        "fp": 3,
+        "fn": 15,
+        "tp": 1682,
+        "accuracy": 0.9961064243997404,
+        "precision": 0.9982195845697329,
+        "recall": 0.9911608721272834,
+        "f1": 0.9946777054997042,
+        "specificity": 0.9989747095010253,
+        "fpr": 0.0010252904989747095,
+        "fnr": 0.00883912787271656,
+        "roc_auc": 0.9994478817711768,
+        "pr_auc": 0.9992845227487146
+      },
+      "xgboost": {
+        "tn": 2925,
+        "fp": 1,
+        "fn": 21,
+        "tp": 1676,
+        "accuracy": 0.9952411853774605,
+        "precision": 0.9994036970781157,
+        "recall": 0.9876252209781968,
+        "f1": 0.993479549496147,
+        "specificity": 0.9996582365003418,
+        "fpr": 0.0003417634996582365,
+        "fnr": 0.012374779021803181,
+        "roc_auc": 0.9992761944503408,
+        "pr_auc": 0.9989877660970338
+      },
+      "selected_model": {
+        "tn": 2923,
+        "fp": 3,
+        "fn": 15,
+        "tp": 1682,
+        "accuracy": 0.9961064243997404,
+        "precision": 0.9982195845697329,
+        "recall": 0.9911608721272834,
+        "f1": 0.9946777054997042,
+        "specificity": 0.9989747095010253,
+        "fpr": 0.0010252904989747095,
+        "fnr": 0.00883912787271656,
+        "roc_auc": 0.9994478817711768,
+        "pr_auc": 0.9992845227487146
+      }
+    }
+  },
+  "selected_vs_rf_identity": {
+    "predictions_identical": true,
+    "probabilities_identical": true
+  },
+  "feature_analysis": {
+    "rf_top_50": [
+      {
+        "rank": 1,
+        "feature": "1 ",
+        "importance": 0.017661259994129305
+      },
+      {
+        "rank": 2,
+        "feature": " = ",
+        "importance": 0.01473782954871867
+      },
+      {
+        "rank": 3,
+        "feature": ") ",
+        "importance": 0.014373810162972466
+      },
+      {
+        "rank": 4,
+        "feature": " and ",
+        "importance": 0.01187906140849147
+      },
+      {
+        "rank": 5,
+        "feature": "--",
+        "importance": 0.011661165487702178
+      },
+      {
+        "rank": 6,
+        "feature": " a",
+        "importance": 0.011418160200245385
+      },
+      {
+        "rank": 7,
+        "feature": " =",
+        "importance": 0.010949381622801714
+      },
+      {
+        "rank": 8,
+        "feature": " ) a",
+        "importance": 0.010551464482788138
+      },
+      {
+        "rank": 9,
+        "feature": " se",
+        "importance": 0.009836679839689994
+      },
+      {
+        "rank": 10,
+        "feature": " )",
+        "importance": 0.009281325404211622
+      },
+      {
+        "rank": 11,
+        "feature": ") ) )",
+        "importance": 0.008388834746791573
+      },
+      {
+        "rank": 12,
+        "feature": "( ",
+        "importance": 0.00764275021418605
+      },
+      {
+        "rank": 13,
+        "feature": "nd ",
+        "importance": 0.007589364525605475
+      },
+      {
+        "rank": 14,
+        "feature": " from",
+        "importance": 0.0074078986205688355
+      },
+      {
+        "rank": 15,
+        "feature": ") ) ",
+        "importance": 0.007363702967736221
+      },
+      {
+        "rank": 16,
+        "feature": " ) ) ",
+        "importance": 0.007110094891022085
+      },
+      {
+        "rank": 17,
+        "feature": " ) ",
+        "importance": 0.006891706418652531
+      },
+      {
+        "rank": 18,
+        "feature": "fr",
+        "importance": 0.006434870269116626
+      },
+      {
+        "rank": 19,
+        "feature": " (",
+        "importance": 0.00639314014817701
+      },
+      {
+        "rank": 20,
+        "feature": "on a",
+        "importance": 0.006348785717843735
+      },
+      {
+        "rank": 21,
+        "feature": "( 5",
+        "importance": 0.006314581124477987
+      },
+      {
+        "rank": 22,
+        "feature": "or ",
+        "importance": 0.006015954596682014
+      },
+      {
+        "rank": 23,
+        "feature": ") and",
+        "importance": 0.005708170175605052
+      },
+      {
+        "rank": 24,
+        "feature": " ) )",
+        "importance": 0.00546310845071938
+      },
+      {
+        "rank": 25,
+        "feature": "5 )",
+        "importance": 0.005304007255762625
+      },
+      {
+        "rank": 26,
+        "feature": " or ",
+        "importance": 0.005282619452025087
+      },
+      {
+        "rank": 27,
+        "feature": " f",
+        "importance": 0.005274966591351399
+      },
+      {
+        "rank": 28,
+        "feature": "all s",
+        "importance": 0.0051901304245283875
+      },
+      {
+        "rank": 29,
+        "feature": " -",
+        "importance": 0.00497774825764815
+      },
+      {
+        "rank": 30,
+        "feature": " all",
+        "importance": 0.004939597134226731
+      },
+      {
+        "rank": 31,
+        "feature": ") )",
+        "importance": 0.0049326965408317365
+      },
+      {
+        "rank": 32,
+        "feature": " ( ",
+        "importance": 0.004905648122003325
+      },
+      {
+        "rank": 33,
+        "feature": " fro",
+        "importance": 0.004899314452786252
+      },
+      {
+        "rank": 34,
+        "feature": "= ",
+        "importance": 0.004778777529519152
+      },
+      {
+        "rank": 35,
+        "feature": "om",
+        "importance": 0.00476602889635054
+      },
+      {
+        "rank": 36,
+        "feature": "fro",
+        "importance": 0.0047361597635755546
+      },
+      {
+        "rank": 37,
+        "feature": " sele",
+        "importance": 0.0044434136654724
+      },
+      {
+        "rank": 38,
+        "feature": "here ",
+        "importance": 0.0044371951864388415
+      },
+      {
+        "rank": 39,
+        "feature": "from ",
+        "importance": 0.004330581035136723
+      },
+      {
+        "rank": 40,
+        "feature": "l sel",
+        "importance": 0.004319230071771654
+      },
+      {
+        "rank": 41,
+        "feature": "and ",
+        "importance": 0.004319174672042817
+      },
+      {
+        "rank": 42,
+        "feature": "1' ",
+        "importance": 0.004288179875700726
+      },
+      {
+        "rank": 43,
+        "feature": "ll s",
+        "importance": 0.004142790418484204
+      },
+      {
+        "rank": 44,
+        "feature": "m ",
+        "importance": 0.0041254206030949285
+      },
+      {
+        "rank": 45,
+        "feature": "r ",
+        "importance": 0.004033833499364949
+      },
+      {
+        "rank": 46,
+        "feature": ") a",
+        "importance": 0.003698213843485608
+      },
+      {
+        "rank": 47,
+        "feature": "d ",
+        "importance": 0.0036787671939492194
+      },
+      {
+        "rank": 48,
+        "feature": "ro",
+        "importance": 0.0035655424880512167
+      },
+      {
+        "rank": 49,
+        "feature": ") an",
+        "importance": 0.0035137346099819253
+      },
+      {
+        "rank": 50,
+        "feature": "nio",
+        "importance": 0.0035060888355758647
+      }
+    ],
+    "xgb_top_50_gain": [
+      {
+        "rank": 1,
+        "feature_id": "f1130",
+        "feature": " =",
+        "gain": 2442.44140625
+      },
+      {
+        "rank": 2,
+        "feature_id": "f8577",
+        "feature": "all s",
+        "gain": 1753.765625
+      },
+      {
+        "rank": 3,
+        "feature_id": "f1135",
+        "feature": " = '",
+        "gain": 1485.0194091796875
+      },
+      {
+        "rank": 4,
+        "feature_id": "f2014",
+        "feature": " on",
+        "gain": 752.939208984375
+      },
+      {
+        "rank": 5,
+        "feature_id": "f3313",
+        "feature": ") ",
+        "gain": 311.1711120605469
+      },
+      {
+        "rank": 6,
+        "feature_id": "f11390",
+        "feature": "ere",
+        "gain": 305.8143615722656
+      },
+      {
+        "rank": 7,
+        "feature_id": "f17031",
+        "feature": "rom w",
+        "gain": 292.970703125
+      },
+      {
+        "rank": 8,
+        "feature_id": "f10573",
+        "feature": "e =",
+        "gain": 289.6424255371094
+      },
+      {
+        "rank": 9,
+        "feature_id": "f1324",
+        "feature": " all ",
+        "gain": 268.858154296875
+      },
+      {
+        "rank": 10,
+        "feature_id": "f509",
+        "feature": " * )",
+        "gain": 181.3681640625
+      },
+      {
+        "rank": 11,
+        "feature_id": "f6063",
+        "feature": "5 ",
+        "gain": 181.02423095703125
+      },
+      {
+        "rank": 12,
+        "feature_id": "f13436",
+        "feature": "leep ",
+        "gain": 179.7110595703125
+      },
+      {
+        "rank": 13,
+        "feature_id": "f11888",
+        "feature": "fro",
+        "gain": 178.7890625
+      },
+      {
+        "rank": 14,
+        "feature_id": "f53",
+        "feature": " '0",
+        "gain": 169.0947265625
+      },
+      {
+        "rank": 15,
+        "feature_id": "f8659",
+        "feature": "and (",
+        "gain": 163.12994384765625
+      },
+      {
+        "rank": 16,
+        "feature_id": "f311",
+        "feature": " ( 5",
+        "gain": 149.2366943359375
+      },
+      {
+        "rank": 17,
+        "feature_id": "f511",
+        "feature": " * f",
+        "gain": 137.8508758544922
+      },
+      {
+        "rank": 18,
+        "feature_id": "f627",
+        "feature": " 1#",
+        "gain": 137.17822265625
+      },
+      {
+        "rank": 19,
+        "feature_id": "f2725",
+        "feature": "' u",
+        "gain": 128.1094970703125
+      },
+      {
+        "rank": 20,
+        "feature_id": "f11889",
+        "feature": "from",
+        "gain": 92.2509765625
+      },
+      {
+        "rank": 21,
+        "feature_id": "f16982",
+        "feature": "ro",
+        "gain": 90.21942901611328
+      },
+      {
+        "rank": 22,
+        "feature_id": "f1682",
+        "feature": " f",
+        "gain": 81.20403289794922
+      },
+      {
+        "rank": 23,
+        "feature_id": "f426",
+        "feature": " )",
+        "gain": 78.4395980834961
+      },
+      {
+        "rank": 24,
+        "feature_id": "f564",
+        "feature": " -",
+        "gain": 73.96916198730469
+      },
+      {
+        "rank": 25,
+        "feature_id": "f19690",
+        "feature": "y =",
+        "gain": 71.06640625
+      },
+      {
+        "rank": 26,
+        "feature_id": "f11673",
+        "feature": "exec",
+        "gain": 67.52603912353516
+      },
+      {
+        "rank": 27,
+        "feature_id": "f11332",
+        "feature": "er",
+        "gain": 66.36380004882812
+      },
+      {
+        "rank": 28,
+        "feature_id": "f606",
+        "feature": " 1",
+        "gain": 66.2756576538086
+      },
+      {
+        "rank": 29,
+        "feature_id": "f3857",
+        "feature": "--",
+        "gain": 61.670257568359375
+      },
+      {
+        "rank": 30,
+        "feature_id": "f18152",
+        "feature": "t co",
+        "gain": 57.44044494628906
+      },
+      {
+        "rank": 31,
+        "feature_id": "f42",
+        "feature": " ' ",
+        "gain": 55.51123809814453
+      },
+      {
+        "rank": 32,
+        "feature_id": "f2027",
+        "feature": " or",
+        "gain": 55.197750091552734
+      },
+      {
+        "rank": 33,
+        "feature_id": "f2004",
+        "feature": " o",
+        "gain": 46.455841064453125
+      },
+      {
+        "rank": 34,
+        "feature_id": "f3319",
+        "feature": ") )",
+        "gain": 45.8765869140625
+      },
+      {
+        "rank": 35,
+        "feature_id": "f15181",
+        "feature": "om",
+        "gain": 45.33082580566406
+      },
+      {
+        "rank": 36,
+        "feature_id": "f456",
+        "feature": " ) ;",
+        "gain": 42.62223434448242
+      },
+      {
+        "rank": 37,
+        "feature_id": "f16250",
+        "feature": "r ",
+        "gain": 40.24504852294922
+      },
+      {
+        "rank": 38,
+        "feature_id": "f17245",
+        "feature": "s ",
+        "gain": 38.31221389770508
+      },
+      {
+        "rank": 39,
+        "feature_id": "f15536",
+        "feature": "or ",
+        "gain": 36.67009735107422
+      },
+      {
+        "rank": 40,
+        "feature_id": "f8936",
+        "feature": "at",
+        "gain": 34.257930755615234
+      },
+      {
+        "rank": 41,
+        "feature_id": "f2554",
+        "feature": "\" ",
+        "gain": 32.45854187011719
+      },
+      {
+        "rank": 42,
+        "feature_id": "f9910",
+        "feature": "d ",
+        "gain": 31.384178161621094
+      },
+      {
+        "rank": 43,
+        "feature_id": "f2678",
+        "feature": "' ",
+        "gain": 29.713136672973633
+      },
+      {
+        "rank": 44,
+        "feature_id": "f13502",
+        "feature": "like",
+        "gain": 28.435283660888672
+      },
+      {
+        "rank": 45,
+        "feature_id": "f11135",
+        "feature": "ele",
+        "gain": 27.19019889831543
+      },
+      {
+        "rank": 46,
+        "feature_id": "f19148",
+        "feature": "user",
+        "gain": 26.13259506225586
+      },
+      {
+        "rank": 47,
+        "feature_id": "f399",
+        "feature": " ( s",
+        "gain": 26.07622718811035
+      },
+      {
+        "rank": 48,
+        "feature_id": "f4469",
+        "feature": "0x",
+        "gain": 25.40052032470703
+      },
+      {
+        "rank": 49,
+        "feature_id": "f2218",
+        "feature": " sel",
+        "gain": 23.161161422729492
+      },
+      {
+        "rank": 50,
+        "feature_id": "f4605",
+        "feature": "1,",
+        "gain": 22.560773849487305
+      }
+    ],
+    "rf_top_20": [
+      {
+        "rank": 1,
+        "feature": "1 ",
+        "importance": 0.017661259994129305
+      },
+      {
+        "rank": 2,
+        "feature": " = ",
+        "importance": 0.01473782954871867
+      },
+      {
+        "rank": 3,
+        "feature": ") ",
+        "importance": 0.014373810162972466
+      },
+      {
+        "rank": 4,
+        "feature": " and ",
+        "importance": 0.01187906140849147
+      },
+      {
+        "rank": 5,
+        "feature": "--",
+        "importance": 0.011661165487702178
+      },
+      {
+        "rank": 6,
+        "feature": " a",
+        "importance": 0.011418160200245385
+      },
+      {
+        "rank": 7,
+        "feature": " =",
+        "importance": 0.010949381622801714
+      },
+      {
+        "rank": 8,
+        "feature": " ) a",
+        "importance": 0.010551464482788138
+      },
+      {
+        "rank": 9,
+        "feature": " se",
+        "importance": 0.009836679839689994
+      },
+      {
+        "rank": 10,
+        "feature": " )",
+        "importance": 0.009281325404211622
+      },
+      {
+        "rank": 11,
+        "feature": ") ) )",
+        "importance": 0.008388834746791573
+      },
+      {
+        "rank": 12,
+        "feature": "( ",
+        "importance": 0.00764275021418605
+      },
+      {
+        "rank": 13,
+        "feature": "nd ",
+        "importance": 0.007589364525605475
+      },
+      {
+        "rank": 14,
+        "feature": " from",
+        "importance": 0.0074078986205688355
+      },
+      {
+        "rank": 15,
+        "feature": ") ) ",
+        "importance": 0.007363702967736221
+      },
+      {
+        "rank": 16,
+        "feature": " ) ) ",
+        "importance": 0.007110094891022085
+      },
+      {
+        "rank": 17,
+        "feature": " ) ",
+        "importance": 0.006891706418652531
+      },
+      {
+        "rank": 18,
+        "feature": "fr",
+        "importance": 0.006434870269116626
+      },
+      {
+        "rank": 19,
+        "feature": " (",
+        "importance": 0.00639314014817701
+      },
+      {
+        "rank": 20,
+        "feature": "on a",
+        "importance": 0.006348785717843735
+      }
+    ],
+    "xgb_top_20_gain": [
+      {
+        "rank": 1,
+        "feature_id": "f1130",
+        "feature": " =",
+        "gain": 2442.44140625
+      },
+      {
+        "rank": 2,
+        "feature_id": "f8577",
+        "feature": "all s",
+        "gain": 1753.765625
+      },
+      {
+        "rank": 3,
+        "feature_id": "f1135",
+        "feature": " = '",
+        "gain": 1485.0194091796875
+      },
+      {
+        "rank": 4,
+        "feature_id": "f2014",
+        "feature": " on",
+        "gain": 752.939208984375
+      },
+      {
+        "rank": 5,
+        "feature_id": "f3313",
+        "feature": ") ",
+        "gain": 311.1711120605469
+      },
+      {
+        "rank": 6,
+        "feature_id": "f11390",
+        "feature": "ere",
+        "gain": 305.8143615722656
+      },
+      {
+        "rank": 7,
+        "feature_id": "f17031",
+        "feature": "rom w",
+        "gain": 292.970703125
+      },
+      {
+        "rank": 8,
+        "feature_id": "f10573",
+        "feature": "e =",
+        "gain": 289.6424255371094
+      },
+      {
+        "rank": 9,
+        "feature_id": "f1324",
+        "feature": " all ",
+        "gain": 268.858154296875
+      },
+      {
+        "rank": 10,
+        "feature_id": "f509",
+        "feature": " * )",
+        "gain": 181.3681640625
+      },
+      {
+        "rank": 11,
+        "feature_id": "f6063",
+        "feature": "5 ",
+        "gain": 181.02423095703125
+      },
+      {
+        "rank": 12,
+        "feature_id": "f13436",
+        "feature": "leep ",
+        "gain": 179.7110595703125
+      },
+      {
+        "rank": 13,
+        "feature_id": "f11888",
+        "feature": "fro",
+        "gain": 178.7890625
+      },
+      {
+        "rank": 14,
+        "feature_id": "f53",
+        "feature": " '0",
+        "gain": 169.0947265625
+      },
+      {
+        "rank": 15,
+        "feature_id": "f8659",
+        "feature": "and (",
+        "gain": 163.12994384765625
+      },
+      {
+        "rank": 16,
+        "feature_id": "f311",
+        "feature": " ( 5",
+        "gain": 149.2366943359375
+      },
+      {
+        "rank": 17,
+        "feature_id": "f511",
+        "feature": " * f",
+        "gain": 137.8508758544922
+      },
+      {
+        "rank": 18,
+        "feature_id": "f627",
+        "feature": " 1#",
+        "gain": 137.17822265625
+      },
+      {
+        "rank": 19,
+        "feature_id": "f2725",
+        "feature": "' u",
+        "gain": 128.1094970703125
+      },
+      {
+        "rank": 20,
+        "feature_id": "f11889",
+        "feature": "from",
+        "gain": 92.2509765625
+      }
+    ]
+  }
+}

@@ -1,0 +1,170 @@
+{
+  "rf_false_positives": [
+    {
+      "query": "dyck",
+      "prob": 0.6050483274133267
+    },
+    {
+      "query": "us",
+      "prob": 0.5204062592314065
+    },
+    {
+      "query": "79",
+      "prob": 0.5005429661952898
+    }
+  ],
+  "rf_false_negatives": [
+    {
+      "query": "(  sqlattempt2  )",
+      "prob": 0.45
+    },
+    {
+      "query": "5739-5738",
+      "prob": 0.06271375661375661
+    },
+    {
+      "query": "create user name identified by 'pass123'",
+      "prob": 0.25
+    },
+    {
+      "query": "sqlattempt1",
+      "prob": 0.2596
+    },
+    {
+      "query": "29%",
+      "prob": 0.41593713121732906
+    },
+    {
+      "query": "union select * from users where login   =   char ...",
+      "prob": 0.33
+    },
+    {
+      "query": ",@variable",
+      "prob": 0.06
+    },
+    {
+      "query": "PRINT",
+      "prob": 0.10722222222222223
+    },
+    {
+      "query": "select",
+      "prob": 0.08
+    },
+    {
+      "query": "limit",
+      "prob": 0.00909090909090909
+    },
+    {
+      "query": "insert",
+      "prob": 0.007727272727272727
+    },
+    {
+      "query": "end# ckxq",
+      "prob": 0.36314389314389317
+    },
+    {
+      "query": "0x77616974666F722064656C61792027303A303A313027 ...",
+      "prob": 0.43
+    },
+    {
+      "query": "tz_offset",
+      "prob": 0.09545011651307536
+    },
+    {
+      "query": "1;SELECT *",
+      "prob": 0.03
+    }
+  ],
+  "xgb_false_positives": [
+    {
+      "query": "fogars de la selva",
+      "prob": 0.5461540818214417
+    }
+  ],
+  "xgb_false_negatives": [
+    {
+      "query": "&'",
+      "prob": 0.07427605241537094
+    },
+    {
+      "query": "5739-5738",
+      "prob": 0.042068105190992355
+    },
+    {
+      "query": "&",
+      "prob": 0.07427605241537094
+    },
+    {
+      "query": "create user name identified by 'pass123'",
+      "prob": 0.09683651477098465
+    },
+    {
+      "query": "sqlattempt1",
+      "prob": 0.13711027801036835
+    },
+    {
+      "query": "exec sp_addsrvrolemember 'name' , 'sysadmin'",
+      "prob": 0.04806342348456383
+    },
+    {
+      "query": "?s",
+      "prob": 0.07427605241537094
+    },
+    {
+      "query": "29%",
+      "prob": 0.05100627243518829
+    },
+    {
+      "query": "union select * from users where login   =   char ...",
+      "prob": 0.02318119816482067
+    },
+    {
+      "query": "order by",
+      "prob": 0.07114692032337189
+    },
+    {
+      "query": "c",
+      "prob": 0.07427605241537094
+    },
+    {
+      "query": ",@variable",
+      "prob": 0.007151089143007994
+    },
+    {
+      "query": "s",
+      "prob": 0.07427605241537094
+    },
+    {
+      "query": "PRINT",
+      "prob": 0.017224373295903206
+    },
+    {
+      "query": "select",
+      "prob": 0.08050395548343658
+    },
+    {
+      "query": "limit",
+      "prob": 0.0381939560174942
+    },
+    {
+      "query": "@",
+      "prob": 0.07427605241537094
+    },
+    {
+      "query": "insert",
+      "prob": 0.0027182409539818764
+    },
+    {
+      "query": "0x77616974666F722064656C61792027303A303A313027 ...",
+      "prob": 0.17486797273159027
+    },
+    {
+      "query": "tz_offset",
+      "prob": 0.021192876622080803
+    },
+    {
+      "query": "1;SELECT *",
+      "prob": 0.009870843030512333
+    }
+  ]
+}

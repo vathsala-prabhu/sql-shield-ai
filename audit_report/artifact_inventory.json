@@ -1,0 +1,207 @@
+{
+  "files": {
+    "models\\metrics.json": {
+      "size_bytes": 1355,
+      "sha256": "86bc99dfef7f5b1e05c0393a50c92cca3ef7a19b1fa7a94e2bd5abae45cf03f7"
+    },
+    "models\\val_metrics.json": {
+      "size_bytes": 558,
+      "sha256": "857719474be3dd16b925eba08549a7a8668a606fedb5a5bee67b67068d394b62"
+    },
+    "models\\random_forest.joblib": {
+      "size_bytes": 7655993,
+      "sha256": "e6fd89ef25a7b3016ff8936e736faf9176662c6800310fc9da73362f1b820cc3"
+    },
+    "models\\xgboost.joblib": {
+      "size_bytes": 147444,
+      "sha256": "d0ed4248c3a15455e9048700164fef249023b22a848bc991f82e1f7033bccfd3"
+    },
+    "models\\selected_model.joblib": {
+      "size_bytes": 7656249,
+      "sha256": "899878dd17652c00e5c9236872c3d66ddcf417a1c8b34f03f027728c3c78f479"
+    },
+    "models\\tfidf_vectorizer.joblib": {
+      "size_bytes": 679502,
+      "sha256": "c509f6758192792d13d86dafd2f4818f0cc989391437144cd78a67e95ac81586"
+    },
+    "data\\Modified_SQL_Dataset.csv": {
+      "size_bytes": 2284050,
+      "sha256": "60af1d160dcc5c3f61440dc8f0c019e8898243951e283402857c10294c6f5cc5"
+    },
+    "data\\clean_dataset.csv": {
+      "size_bytes": 2542565,
+      "sha256": "daa19f70648361a342114a905e5b0854089af69d707e4b1b940b985018e18a45"
+    },
+    "data\\train.csv": {
+      "size_bytes": 1775605,
+      "sha256": "9dd24feaeabc0082a7bc16b9d7085c7cb67bd5ae0d47d57312783ec75ba4a5ec"
+    },
+    "data\\val.csv": {
+      "size_bytes": 390165,
+      "sha256": "93cae2a51c2db4f591d81c4154cc4493bfd3a4436bca77dea050a616a3d28c85"
+    },
+    "data\\test.csv": {
+      "size_bytes": 376825,
+      "sha256": "9674b98fde7b7a953611697be42c16430ca4c785e1e277a19879e96ace293992"
+    }
+  },
+  "model_artifacts": {
+    "random_forest": {
+      "type": "<class 'sklearn.ensemble._forest.RandomForestClassifier'>",
+      "class_name": "RandomForestClassifier",
+      "params": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "None",
+        "criterion": "gini",
+        "max_depth": "None",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "1",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "100",
+        "n_jobs": "-1",
+        "oob_score": "False",
+        "random_state": "42",
+        "verbose": "0",
+        "warm_start": "False"
+      },
+      "n_features_in_": 20000,
+      "classes_": [
+        0,
+        1
+      ],
+      "n_estimators": 100,
+      "n_actual_estimators": 100
+    },
+    "xgboost": {
+      "type": "<class 'xgboost.sklearn.XGBClassifier'>",
+      "class_name": "XGBClassifier",
+      "params": {
+        "objective": "binary:logistic",
+        "base_score": "None",
+        "booster": "None",
+        "callbacks": "None",
+        "colsample_bylevel": "None",
+        "colsample_bynode": "None",
+        "colsample_bytree": "None",
+        "device": "None",
+        "early_stopping_rounds": "None",
+        "enable_categorical": "True",
+        "eval_metric": "logloss",
+        "feature_types": "None",
+        "feature_weights": "None",
+        "gamma": "None",
+        "grow_policy": "None",
+        "importance_type": "None",
+        "interaction_constraints": "None",
+        "learning_rate": "None",
+        "max_bin": "None",
+        "max_cat_threshold": "None",
+        "max_cat_to_onehot": "None",
+        "max_delta_step": "None",
+        "max_depth": "None",
+        "max_leaves": "None",
+        "min_child_weight": "None",
+        "missing": "nan",
+        "monotone_constraints": "None",
+        "multi_strategy": "None",
+        "n_estimators": "None",
+        "n_jobs": "-1",
+        "num_parallel_tree": "None",
+        "random_state": "42",
+        "reg_alpha": "None",
+        "reg_lambda": "None",
+        "sampling_method": "None",
+        "scale_pos_weight": "1.7243905519767588",
+        "subsample": "None",
+        "tree_method": "None",
+        "validate_parameters": "None",
+        "verbosity": "None"
+      },
+      "n_features_in_": 20000,
+      "classes_": [
+        0,
+        1
+      ],
+      "num_boosted_rounds": 100
+    },
+    "selected_model": {
+      "type": "<class 'sklearn.ensemble._forest.RandomForestClassifier'>",
+      "class_name": "RandomForestClassifier",
+      "params": {
+        "bootstrap": "True",
+        "ccp_alpha": "0.0",
+        "class_weight": "None",
+        "criterion": "gini",
+        "max_depth": "None",
+        "max_features": "sqrt",
+        "max_leaf_nodes": "None",
+        "max_samples": "None",
+        "min_impurity_decrease": "0.0",
+        "min_samples_leaf": "1",
+        "min_samples_split": "2",
+        "min_weight_fraction_leaf": "0.0",
+        "monotonic_cst": "None",
+        "n_estimators": "100",
+        "n_jobs": "-1",
+        "oob_score": "False",
+        "random_state": "42",
+        "verbose": "0",
+        "warm_start": "False"
+      },
+      "n_features_in_": 20000,
+      "classes_": [
+        0,
+        1
+      ],
+      "n_estimators": 100,
+      "n_actual_estimators": 100
+    },
+    "tfidf_vectorizer": {
+      "type": "<class 'sklearn.feature_extraction.text.TfidfVectorizer'>",
+      "class_name": "TfidfVectorizer",
+      "params": {
+        "analyzer": "char",
+        "binary": "False",
+        "decode_error": "strict",
+        "dtype": "<class 'numpy.float64'>",
+        "encoding": "utf-8",
+        "input": "content",
+        "lowercase": "True",
+        "max_df": "1.0",
+        "max_features": "20000",
+        "min_df": "1",
+        "ngram_range": "(2, 5)",
+        "norm": "l2",
+        "preprocessor": "None",
+        "smooth_idf": "True",
+        "stop_words": "None",
+        "strip_accents": "None",
+        "sublinear_tf": "False",
+        "token_pattern": "(?u)\\b\\w\\w+\\b",
+        "tokenizer": "None",
+        "use_idf": "True",
+        "vocabulary": "None"
+      },
+      "vocabulary_size": 20000,
+      "ngram_range": [
+        2,
+        5
+      ],
+      "analyzer": "char",
+      "max_features": 20000,
+      "min_df": 1,
+      "max_df": 1.0,
+      "lowercase": true,
+      "norm": "l2",
+      "use_idf": true,
+      "sublinear_tf": false,
+      "smooth_idf": true
+    }
+  }
+}
